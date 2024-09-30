@@ -18,10 +18,10 @@ function App() {
     const [lastCreatedGame, setLastCreatedGame] = useState();
 
     useEffect(() => {
-        if (!webAppUser) {//remove
+        if (webAppUser) {
             const user = {
-                id: webAppUser?.id ?? 6900305455, //remove
-                username: webAppUser?.username ?? "username",
+                id: webAppUser?.id ,
+                username: webAppUser?.username,
             };
             setInitUser(user);
             if (user?.id) {
@@ -121,7 +121,7 @@ function App() {
         }
     };
 
-    if (!(initUser || score)) {
+    if (!initUser || !score) {
         return (
             <div className="content active">
                 <h2 style={{marginBottom: "20px"}}>Welcome to CoinFlip!</h2>
