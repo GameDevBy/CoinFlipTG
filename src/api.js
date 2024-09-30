@@ -1,8 +1,7 @@
-const host = 'https://coin-flip-tg-28d6109cebba.herokuapp.com'
+const host = process.env.REACT_APP_SERVER_HOST
 export const fetchUserData = async (user, setScore) => {
     try {
         const response = await fetch(`${host}/api/users/${user.id}/${user.username}`);
-
         const userData = await response.json();
         setScore(userData.score);
     } catch (error) {
@@ -27,10 +26,7 @@ export const createGame = async (requestData) => {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(requestData),
         });
-        const game = await response.json();
-        // No need for tg.sendData here
-        console.log("Game created:", game);
-        return game
+        return await response.json()
     } catch (error) {
         console.error("Error creating game:", error);
     }

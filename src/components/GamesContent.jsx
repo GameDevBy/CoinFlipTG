@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {formatDate} from "../utils";
 
 const GamesContent = ({games, initUser}) => {
-
+    console.log(games)
     const [activeGameId, setActiveGameId] = useState(null);
 
     const actionButton = (game) => {
