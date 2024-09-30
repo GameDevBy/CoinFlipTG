@@ -4,7 +4,7 @@ import ScoreContent from "./components/ScoreContent";
 import {createGame, fetchGames, fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
-import {choices, createGameShareUrl, tabs} from "./constants";
+import {choices, createGameUrl, tabs} from "./constants";
 
 function App() {
     const {webAppUser, tg} = useTelegram()
@@ -20,7 +20,7 @@ function App() {
     useEffect(() => {
         if (webAppUser) {
             const user = {
-                id: webAppUser?.id ,
+                id: webAppUser?.id,
                 username: webAppUser?.username,
             };
             setInitUser(user);
@@ -84,42 +84,22 @@ function App() {
 
     const shareLastCreatedGame = () => {
         if (lastCreatedGame) {
-            const gameUrl = createGameShareUrl(lastCreatedGame);
-            const text = `Join my CoinFlip game!\nBet: ${lastCreatedGame.bet} flypky\nMy choice: ${lastCreatedGame.initiatorChoice}`;
+            const gameUrl = createGameUrl(lastCreatedGame);
+            const text = `Let's play CoinFlip! Bet: ${lastCreatedGame.bet} flypky\nMy choice: ${lastCreatedGame.initiatorChoice}`;
 
-            if (typeof tg.showPopup === 'function') {
-                tg.showPopup({
-                    title: 'Share Game',
-                    message: 'How would you like to share this game?',
-                    buttons: [
-                        {id: 'share', type: 'default', text: 'Share URL'},
-                        {id: 'cancel', type: 'cancel'},
-                    ]
-                }, (buttonId) => {
-                    if (buttonId === 'share') {
-                        shareUrl(gameUrl, text);
-                    }
-                });
-            } else {
-                // Fallback for older versions
-                tg.showAlert('Sharing game...', () => {
-                    shareUrl(gameUrl, text);
-                });
-            }
+            const shareUrl = createShareUrl(gameUrl, text);
+
+            tg.openTelegramLink(shareUrl);
         }
     };
 
-    const shareUrl = (url, text) => {
-        if (typeof tg.shareUrl === 'function') {
-            tg.shareUrl({
-                url: url,
-                text: text
-            });
-        } else {
-            // Fallback if shareUrl is not available
-            tg.openLink(url);
-        }
-    };
+
+    const createShareUrl = (url, text) => {
+        const encodedUrl = encodeURIComponent(url);
+        // Replace '+' with '%20' to ensure spaces are correctly encoded
+        const encodedText = encodeURIComponent(text);
+        return "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedText;
+    }
 
     if (!initUser || !score) {
         return (
