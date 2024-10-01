@@ -12,3 +12,13 @@ export const formatDate = (dateArray) => {
     // Format the date as ISO string and return only the part we need
     return date.toLocaleString().slice(0, 20).replace('T', ' ');
 };
+
+
+export const createGameUrl = (game) => `https://t.me/${process.env.REACT_APP_TG_BOT_NAME}?start=game_${game.gameCode}`
+
+export const createShareUrl = (url, text) => {
+    const encodedUrl = encodeURIComponent(url);
+    // Replace '+' with '%20' to ensure spaces are correctly encoded
+    const encodedText = encodeURIComponent(text);
+    return "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedText;
+}

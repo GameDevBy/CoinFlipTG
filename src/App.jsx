@@ -4,7 +4,8 @@ import ScoreContent from "./components/ScoreContent";
 import {createGame, fetchGames, fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
-import {choices, createGameUrl, tabs} from "./constants";
+import {choices, tabs} from "./constants";
+import {createGameUrl, createShareUrl} from "./utils";
 
 function App() {
     const {webAppUser, tg} = useTelegram()
@@ -94,12 +95,7 @@ function App() {
     };
 
 
-    const createShareUrl = (url, text) => {
-        const encodedUrl = encodeURIComponent(url);
-        // Replace '+' with '%20' to ensure spaces are correctly encoded
-        const encodedText = encodeURIComponent(text);
-        return "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedText;
-    }
+
 
     if (!initUser || !score) {
         return (

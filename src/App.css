@@ -146,10 +146,12 @@ body {
 .table-cell {
   flex: 1;
   padding: 10px;
+  text-align: center;
 }
 
 .delete-game-btn,
-.join-game-btn {
+.join-game-btn,
+.share-game-btn {
   padding: 0 10px;
   height: 100%;
   border: none;
@@ -163,7 +165,7 @@ body {
   color: white;
 }
 
-.join-game-btn {
+.join-game-btn, .share-game-btn {
   background-color: #46b449;
   color: white;
 }
