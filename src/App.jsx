@@ -4,34 +4,42 @@ import ScoreContent from "./components/ScoreContent";
 import {createGame, fetchGames, fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
-import {choices, tabs} from "./constants";
+import {choices, GameState, MIN_BET_VALUE, tabs} from "./constants";
 import {createGameUrl, createShareUrl} from "./utils";
+import ActiveGameRoom from "./components/ActiveGameRoom";
 
 function App() {
     const {webAppUser, tg} = useTelegram()
     const [initUser, setInitUser] = useState();
     const [activeTab, setActiveTab] = useState("home");
     const [isCreatingGame, setIsCreatingGame] = useState();
-    const [bet, setBet] = useState(1);
+    const [bet, setBet] = useState(MIN_BET_VALUE);
     const [choice, setChoice] = useState(choices[0]);
     const [score, setScore] = useState();
     const [games, setGames] = useState([]);
     const [lastCreatedGame, setLastCreatedGame] = useState();
+    const [activeGame, setActiveGame] = useState(null);
 
     useEffect(() => {
         if (webAppUser) {
             const user = {
-                id: webAppUser?.id,
+                telegramId: webAppUser?.id,
                 username: webAppUser?.username,
             };
-            setInitUser(user);
-            if (user?.id) {
-                fetchUserData(user, setScore);
+            if (user?.telegramId) {
+                fetchUserData(user, setInitUser, setScore);
                 fetchGames(setGames);
             }
         }
         tg.expand();
     }, [webAppUser]);
+
+    useEffect(() => {
+        if (games.length > 0) {
+            const currentActiveGame = games.find(game => game.state === GameState.IN_PROGRESS && game.opponentId === initUser.telegramId)
+            setActiveGame(currentActiveGame)
+        }
+    }, [games]);
 
     const openCreateGameMenu = () => {
         setIsCreatingGame(!isCreatingGame);
@@ -65,10 +73,6 @@ function App() {
         }
     };
 
-    const sortGames = (criteria) => {
-        console.log(`Sorting games by ${criteria}`);
-        // Implement sorting logic here
-    };
 
     const handleCreateGame = async () => {
         const requestData = {
@@ -95,7 +99,20 @@ function App() {
     };
 
 
-
+    const handleFlipCoin = async () => {
+        if (!activeGame) return;
+        try {
+            const response = await fetch(`/api/games/${activeGame.id}/flip`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({userId: initUser.id})
+            });
+            const result = await response.json();
+            setActiveGame({...activeGame, result: result.outcome});
+        } catch (error) {
+            console.error("Error flipping coin:", error);
+        }
+    };
 
     if (!initUser || !score) {
         return (
@@ -214,6 +231,11 @@ function App() {
                     <GamesContent initUser={initUser} games={games}/>
                 </div>
             )}
+            <ActiveGameRoom
+                game={activeGame}
+                onClose={() => setActiveGame(null)}
+                onFlipCoin={handleFlipCoin}
+            />
         </div>
     );
 }

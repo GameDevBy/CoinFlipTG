@@ -8,7 +8,7 @@ const GamesContent = ({games, initUser}) => {
     const [activeGameId, setActiveGameId] = useState(null);
 
     const actionButton = (game) => {
-        return game.initiatorId === initUser.id ? ([
+        return game.initiatorId === initUser.telegramId ? ([
                 <button
                     className="delete-game-btn"
                     onClick={(e) => handleDeleteGame(e, game.id)}
@@ -16,7 +16,7 @@ const GamesContent = ({games, initUser}) => {
                     Delete Game
                 </button>, <button
                     className="share-game-btn"
-                    onClick={(e) => handleShareGame(e, game.gameCode)}
+                    onClick={(e) => handleShareGame(e, game)}
                 >
                     Share Game
                 </button>]
@@ -34,21 +34,24 @@ const GamesContent = ({games, initUser}) => {
         setActiveGameId(activeGameId === gameId ? null : gameId);
     };
 
-    const handleDeleteGame = (gameId) => {
+    const handleDeleteGame = (e,gameId) => {
+        e.preventDefault()
         // Implement the logic to delete the game
         console.log(`Deleting game with id: ${gameId}`);
         // You might want to make an API call here and then update the games state
     };
-    const handleShareGame = (game) => {
+    const handleShareGame = (e, game) => {
+        e.preventDefault();
         const gameUrl = createGameUrl(game);
-        const text = `Let's play CoinFlip! Bet: ${game.bet} flypky\nMy choice: ${game.initiatorChoice}`;
+        const text = `Let's play CoinFlip! Bet: ${game.bet} flipky\nMy choice: ${game.initiatorChoice}`;
 
         const shareUrl = createShareUrl(gameUrl, text);
 
-        tg.openTelegramLink(shareUrl);
+        // tg.openTelegramLink(shareUrl);
     };
 
-    const handleJoinGame = (gameId) => {
+    const handleJoinGame = (e,gameId) => {
+        e.preventDefault();
         // Implement the logic to join the game
         console.log(`Joining game with id: ${gameId}`);
         // You might want to make an API call here and then update the games state
@@ -69,13 +72,13 @@ const GamesContent = ({games, initUser}) => {
                         }}>
                             {activeGameId === game.id
                                 ? actionButton(game)[0]
-                                : game.initiatorId === initUser.id ? "Me" : game.initiatorUsername}
+                                : game.initiatorId === initUser.telegramId ? "Me" : game.initiatorUsername}
                         </div>
                         <div className="table-cell">{game.bet}</div>
                         <div className="table-cell" style={{
-                            padding: activeGameId === game.id && game.initiatorId === initUser.id ? "6px 10px" : "10px"
+                            padding: activeGameId === game.id && game.initiatorId === initUser.telegramId ? "6px 10px" : "10px"
                         }}>
-                            {activeGameId === game.id && game.initiatorId === initUser.id
+                            {activeGameId === game.id && game.initiatorId === initUser.telegramId
                                 ? actionButton(game)[1]
                                 : formatDate(game.createdAt)}
                         </div>

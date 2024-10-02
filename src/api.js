@@ -1,8 +1,9 @@
 const host = process.env.REACT_APP_SERVER_HOST
-export const fetchUserData = async (user, setScore) => {
+export const fetchUserData = async (user,setInitUser, setScore) => {
     try {
-        const response = await fetch(`${host}/api/users/${user.id}/${user.username}`);
+        const response = await fetch(`${host}/api/users/${user.telegramId}/${user.username}`);
         const userData = await response.json();
+        setInitUser(userData)
         setScore(userData.score);
     } catch (error) {
         console.error("Error fetching user data:", error);
