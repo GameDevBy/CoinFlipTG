@@ -47,7 +47,7 @@ const GamesContent = ({games, initUser}) => {
 
         const shareUrl = createShareUrl(gameUrl, text);
 
-        // tg.openTelegramLink(shareUrl);
+        tg.openTelegramLink(shareUrl);
     };
 
     const handleJoinGame = (e,gameId) => {
