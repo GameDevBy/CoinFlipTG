@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/CoinFlipTG/static/css/main.f6efa90f.css",
-    "main.js": "/CoinFlipTG/static/js/main.55ee6d61.js",
+    "main.css": "/CoinFlipTG/static/css/main.31bb8666.css",
+    "main.js": "/CoinFlipTG/static/js/main.91f76c5d.js",
     "static/js/453.419a5d54.chunk.js": "/CoinFlipTG/static/js/453.419a5d54.chunk.js",
     "index.html": "/CoinFlipTG/index.html",
-    "main.f6efa90f.css.map": "/CoinFlipTG/static/css/main.f6efa90f.css.map",
-    "main.55ee6d61.js.map": "/CoinFlipTG/static/js/main.55ee6d61.js.map",
+    "main.31bb8666.css.map": "/CoinFlipTG/static/css/main.31bb8666.css.map",
+    "main.91f76c5d.js.map": "/CoinFlipTG/static/js/main.91f76c5d.js.map",
     "453.419a5d54.chunk.js.map": "/CoinFlipTG/static/js/453.419a5d54.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f6efa90f.css",
-    "static/js/main.55ee6d61.js"
+    "static/css/main.31bb8666.css",
+    "static/js/main.91f76c5d.js"
   ]
 }
