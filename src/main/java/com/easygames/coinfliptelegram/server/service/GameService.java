@@ -3,6 +3,7 @@ package com.easygames.coinfliptelegram.server.service;
 import com.easygames.coinfliptelegram.server.dao.GameRepository;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
 import com.easygames.coinfliptelegram.server.dto.GameDto;
+import com.easygames.coinfliptelegram.server.dto.UserDto;
 import com.easygames.coinfliptelegram.server.model.Game;
 import com.easygames.coinfliptelegram.server.model.GameState;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,13 +49,28 @@ public class GameService {
     }
 
 
-    public GameDto joinGame(Long userId, Long gameId) {
-        // Join existing game in database
-        // Return updated GameDTO object
-        return null;
+    public void joinGame(UserDto userDto, GameDto gameDto) {
+        gameDto.setOpponentId(userDto.getTelegramId());
+        gameDto.setOpponentUsername(userDto.getUsername());
+        gameDto.setState(GameState.IN_PROGRESS);
+        gameRepository.save(modelMapper.map(gameDto,Game.class));
     }
 
     public GameDto getGame(String id) {
         return modelMapper.map(gameRepository.findById(id), GameDto.class);
+    }
+
+    public GameDto getGameByGameCode(String gameCode) {
+        Optional<Game> game = gameRepository.findByGameCode(gameCode);
+        if (game.isPresent()) {
+            return modelMapper.map(game, GameDto.class);
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isGameFinished(String gameCode) {
+        GameDto game = getGameByGameCode(gameCode);
+        return game == null || game.getState() == GameState.FINISHED;
     }
 }

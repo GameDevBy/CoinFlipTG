@@ -20,10 +20,10 @@ public class UserController {
     private final UserService userService;
     private final GameService gameService;
 
-    @GetMapping("{id}/{username}")
-    public ResponseEntity<UserDto> getUserData(@PathVariable Long id, @PathVariable String username) {
-        log.info("Received GET request for user with id: {}", id);
-        UserDto userData = userService.getUser(id, username);
+    @GetMapping("{telegramId}/{username}")
+    public ResponseEntity<UserDto> getUserData(@PathVariable Long telegramId, @PathVariable String username) {
+        log.info("Received GET request for user with id: {}", telegramId);
+        UserDto userData = userService.getUser(telegramId, username);
         return ResponseEntity.ok(userData);
     }
 

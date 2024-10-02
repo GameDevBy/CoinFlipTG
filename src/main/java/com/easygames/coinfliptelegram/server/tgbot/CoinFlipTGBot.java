@@ -1,6 +1,9 @@
 package com.easygames.coinfliptelegram.server.tgbot;
 
+import com.easygames.coinfliptelegram.server.dto.GameDto;
+import com.easygames.coinfliptelegram.server.dto.UserDto;
 import com.easygames.coinfliptelegram.server.service.GameService;
+import com.easygames.coinfliptelegram.server.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,11 +22,15 @@ import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @Component
 public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
     private final GameService gameService;
+    private final UserService userService;
     private final TelegramClient telegramClient;
     @Value("${BOT.TOKEN}")
     private String botToken;
@@ -33,11 +40,13 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
     private int MIN_BET_AMOUNT;
 
     public CoinFlipTGBot(
-            GameService gameService,
+            GameService gameService, UserService userService,
             TelegramClient telegramClient) {
         this.gameService = gameService;
+        this.userService = userService;
         this.telegramClient = telegramClient;
     }
+
 
     @Override
     public String getBotToken() {
@@ -66,24 +75,16 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         String messageText = message.getText();
         long chatId = message.getChatId();
         String username = message.getFrom().getUserName();
-
-        if (messageText.startsWith("/start")) {
-            sendStartMessage(chatId);
+        System.out.println(chatId);
+        System.out.println(MIN_BET_AMOUNT);
+        if (messageText.startsWith("/start") || messageText.equals("/play")) {
+            if (messageText.length() > 7) { // If there's a game code after /start
+                String gameCode = messageText.substring(7).trim();
+                    joinGame(chatId, gameCode, username);
+            } else {
+                sendOpenAppMessage(chatId, "Welcome to Coin Flip!", "Play");
+            }
         }
-//        if (messageText.startsWith("/start") || messageText.equals("/play")) {
-//            if (messageText.length() > 7) { // If there's a game code after /start
-//                String gameCode = messageText.substring(7).trim();
-//                if (gameService.isGameFinished(gameCode)) {
-//                    String text = "This game has already finished. You can start a new game.";
-//                    SendMessage backMessage = createMessageWithKeyboard(chatId, text,
-//                            Collections.singletonList(createButton("Play Game", "play")));
-//                    telegramClient.execute(backMessage);
-//                } else {
-//                    joinGame(chatId, gameCode, username);
-//                }
-//            } else {
-//                sendStartMessage(chatId);
-//            }
 //        } else {
 //            GameInfo game = gameService.getGameWaitingBet(chatId);
 //            if (game.getState() == GameState.ENTERING_CUSTOM_BET) {
@@ -128,27 +129,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //        telegramClient.execute(answer);
 //    }
 //
-    private void sendStartMessage(long chatId) throws TelegramApiException {
-        System.out.println(chatId);
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text("Welcome")
-                .replyMarkup(InlineKeyboardMarkup.builder()
-                        .keyboardRow(new InlineKeyboardRow(InlineKeyboardButton.builder()
-                                .text("Welcome")
-                                .webApp(WebAppInfo.builder()
-                                        .url("https://gamedevby.github.io/CoinFlipTG/").build())
-                                .build()
-                        ))
-                        .build())
-                .build();
-//        String messageText = String.format("Welcome to Coin Flip!\nYour current score: %d\nYour flipky: %d\n", user.getScore(), user.getFlipky());
-//        SendMessage message = createMessageWithKeyboard(chatId, messageText,
-//                Collections.singletonList(createButton("Play Game", "play")));
-        telegramClient.execute(message);
-    }
 
-    //
+
 //    private void handlePlayCommand(long chatId, String username) throws TelegramApiException {
 //        User user = gameService.getOrCreateUser(chatId, username);
 //        if (user.getFlipky() < MIN_BET_AMOUNT) {
@@ -303,22 +285,40 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //
 //    }
 //
-//    private void joinGame(long chatId, String gameCode, String username) throws TelegramApiException {
-//        User user = gameService.getOrCreateUser(chatId, username);
-//        GameInfo game = gameService.getGame(gameCode);
-//        if (user.getFlipky() < game.getBetAmount()) {
-//            sendMessage(chatId, "You don't have enough flipky to play. You need at least 10 flipky.");
-//            return;
-//        }
-//        JoinGameResult result = gameService.joinGame(chatId, gameCode, username);
-//        if (result.success) {
-//            sendMessage(chatId, "Game started. " + result.message + " is making a choice.");
-//            sendMessageWithChoiceButtons(result.initiatorId, username + " accepted invitation. Game started! Choose Heads or Tails:", gameCode);
-//        } else {
-//            sendMessage(chatId, result.message);
-//        }
-//    }
-//
+    private void joinGame(long telegramId, String gameCode, String username) throws TelegramApiException {
+        if (gameService.isGameFinished(gameCode)) {
+            String text = "This game has already finished. You can start a new game.";
+            sendOpenAppMessage(telegramId, text, "Open");
+            return;
+        }
+        UserDto user = userService.getUser(telegramId,username);
+        GameDto game = gameService.getGame(gameCode);
+        if (user.getScore().getFlipkyBalance() < game.getBet()) {
+            String text = "You don't have enough flipky to play.\nYou can join another or create your own game.";
+            sendOpenAppMessage(telegramId, text, "Open");
+            return;
+        }
+        gameService.joinGame(user, game);
+        String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorId());
+        sendOpenAppMessage(telegramId, text, "Continue");
+    }
+
+    private void sendOpenAppMessage(long chatId, String messageText, String buttonText) throws TelegramApiException {
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text(messageText)
+                .replyMarkup(InlineKeyboardMarkup.builder()
+                        .keyboardRow(new InlineKeyboardRow(InlineKeyboardButton.builder()
+                                .text(buttonText)
+                                .webApp(WebAppInfo.builder()
+                                        .url("https://gamedevby.github.io/CoinFlipTG/")
+                                        .build())
+                                .build()
+                        ))
+                        .build())
+                .build();
+        telegramClient.execute(message);
+    }
 //    private void handleChoice(long chatId, String gameCode, String choice) throws TelegramApiException {
 //        if (!gameService.canMakeChoice(chatId, gameCode)) {
 //            sendMessage(chatId, "It's not your turn or you're not in this game.");
@@ -369,27 +369,25 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //        }
 //    }
 //
-//    private SendMessage createMessageWithKeyboard(long chatId, String text, List<InlineKeyboardButton> buttons) {
-//        SendMessage.SendMessageBuilder messageBuilder = SendMessage.builder()
-//                .chatId(String.valueOf(chatId))
-//                .text(text);
-//
-//        if (!buttons.isEmpty()) {
-//            InlineKeyboardMarkup markupInline = InlineKeyboardMarkup.builder()
-//                    .keyboardRow(new InlineKeyboardRow(buttons))
-//                    .build();
-//            messageBuilder.replyMarkup(markupInline);
-//        }
-//
-//        return messageBuilder.build();
-//    }
-//
-//    private InlineKeyboardButton createButton(String text, String callbackData) {
-//        return InlineKeyboardButton.builder()
-//                .text(text)
-//                .callbackData(callbackData)
-//                .build();
-//    }
+    private SendMessage createMessageWithKeyboard(long chatId, String text, List<InlineKeyboardButton> buttons) {
+        SendMessage.SendMessageBuilder messageBuilder = SendMessage.builder()
+                .chatId(String.valueOf(chatId))
+                .text(text);
+        if (!buttons.isEmpty()) {
+            InlineKeyboardMarkup markupInline = InlineKeyboardMarkup.builder()
+                    .keyboardRow(new InlineKeyboardRow(buttons))
+                    .build();
+            messageBuilder.replyMarkup(markupInline);
+        }
+        return messageBuilder.build();
+    }
+
+    private InlineKeyboardButton createButton(String text, String callbackData) {
+        return InlineKeyboardButton.builder()
+                .text(text)
+                .callbackData(callbackData)
+                .build();
+    }
 //
 //    private void sendMessage(long chatId, String text) throws TelegramApiException {
 //        SendMessage message = SendMessage.builder()

@@ -17,15 +17,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
-    public UserDto saveUser(long chatId, String username) {
-        Optional<User> user = userRepository.findByTelegramId(chatId);
+    public UserDto saveUser(long telegramId, String username) {
+        Optional<User> user = userRepository.findByTelegramId(telegramId);
         if (user.isPresent()) {
             return modelMapper.map(user.get(), UserDto.class);
         } else {
             Score score = new Score();
             score.setFlipkyBalance(500);
             User newUser = User.builder()
-                    .telegramId(chatId)
+                    .telegramId(telegramId)
                     .username(username)
                     .score(score)
                     .build();
@@ -35,14 +35,14 @@ public class UserService {
         }
     }
 
-    public UserDto getUser(Long id, String username) {
-        Optional<User> optionalUser = userRepository.findByTelegramId(id);
+    public UserDto getUser(Long telegramId, String username) {
+        Optional<User> optionalUser = userRepository.findByTelegramId(telegramId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             Score score = user.getScore();
             return modelMapper.map(user, UserDto.class);
         } else {
-            return saveUser(id, username);
+            return saveUser(telegramId, username);
         }
     }
 
@@ -51,8 +51,8 @@ public class UserService {
         return Optional.ofNullable(user.getTelegramId());
     }
 
-    public Optional<String> getUsernameById(long chatId) throws Exception {
-        User user = userRepository.findByTelegramId(chatId).orElseThrow(() -> new Exception("User not found"));
+    public Optional<String> getUsernameByTelegramId(long telegramId) throws Exception {
+        User user = userRepository.findByTelegramId(telegramId).orElseThrow(() -> new Exception("User not found"));
         return Optional.ofNullable(user.getUsername());
     }
 }
