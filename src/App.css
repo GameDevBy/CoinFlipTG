@@ -141,6 +141,8 @@ body {
   border: 1px dashed var(--tg-theme-hint-color, #999999);
   border-radius: 15px; /* Rounded corners for each row */
   cursor: pointer;
+  align-items: center;
+  height: 40px;
 }
 
 .table-cell {
@@ -152,7 +154,7 @@ body {
 .delete-game-btn,
 .join-game-btn,
 .share-game-btn {
-  padding: 0 10px;
+  padding: 10px;
   height: 100%;
   border: none;
   border-radius: 10px;

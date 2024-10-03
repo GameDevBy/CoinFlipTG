@@ -4,8 +4,8 @@ const ActiveGameRoom = ({game, onClose, onFlipCoin}) => {
     if (!game) return null;
     return (
         <div className="active-game-dialog">
-            <h2>Game Room by {game.initiatorUsername}</h2>
-            <p>Bet: {game.bet} flypky</p>
+            <h2>Game with {game.initiatorUsername}</h2>
+            <p>Bet: {game.bet} flipky</p>
             <p>Your choice: {game.initiatorChoice}</p>
             {game.result ? (
                 <p>Result: {game.result}</p>

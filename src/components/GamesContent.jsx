@@ -1,44 +1,31 @@
 import React, {useState} from 'react';
 import {createGameUrl, createShareUrl, formatDate} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
+import {deleteGame, joinGame} from "../api";
 
-const GamesContent = ({games, initUser}) => {
+const GamesContent = ({games, initUser, setGames, setActiveGame}) => {
     const {tg} = useTelegram()
 
     const [activeGameId, setActiveGameId] = useState(null);
 
-    const actionButton = (game) => {
-        return game.initiatorId === initUser.telegramId ? ([
-                <button
-                    className="delete-game-btn"
-                    onClick={(e) => handleDeleteGame(e, game.id)}
-                >
-                    Delete Game
-                </button>, <button
-                    className="share-game-btn"
-                    onClick={(e) => handleShareGame(e, game)}
-                >
-                    Share Game
-                </button>]
-        ) : (
-            [<button
-                className="join-game-btn"
-                onClick={(e) => handleJoinGame(e, game.id)}
-            >
-                Join Game
-            </button>]
-        );
-    };
+
 
     const handleGameClick = (gameId) => {
         setActiveGameId(activeGameId === gameId ? null : gameId);
     };
 
-    const handleDeleteGame = (e,gameId) => {
+    const handleDeleteGame = async (e, game) => {
         e.preventDefault()
-        // Implement the logic to delete the game
-        console.log(`Deleting game with id: ${gameId}`);
-        // You might want to make an API call here and then update the games state
+        try {
+            const isDelete = await deleteGame(game.id);
+            if (isDelete) {
+                const updatedArray = games.filter(el => el.id !== game.id)
+                setGames(updatedArray)
+                console.log(`Deleting game with id: ${game.id}`);
+            }
+        } catch (err) {
+            console.error(err)
+        }
     };
     const handleShareGame = (e, game) => {
         e.preventDefault();
@@ -50,11 +37,39 @@ const GamesContent = ({games, initUser}) => {
         tg.openTelegramLink(shareUrl);
     };
 
-    const handleJoinGame = (e,gameId) => {
+    const handleJoinGame = async (e, game) => {
         e.preventDefault();
-        // Implement the logic to join the game
-        console.log(`Joining game with id: ${gameId}`);
-        // You might want to make an API call here and then update the games state
+        try {
+            const joinedGame = await joinGame(initUser.telegramId, game.id);
+            if (joinedGame) {
+                setActiveGame(joinedGame)
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    };
+
+    const actionButton = (game) => {
+        return game.initiatorId === initUser.telegramId ? ([
+                <button
+                    className="delete-game-btn"
+                    onClick={(e) => handleDeleteGame(e, game)}
+                >
+                    Delete Game
+                </button>, <button
+                    className="share-game-btn"
+                    onClick={(e) => handleShareGame(e, game)}
+                >
+                    Share Game
+                </button>]
+        ) : (
+            [<button
+                className="join-game-btn"
+                onClick={(e) => handleJoinGame(e, game)}
+            >
+                Join Game
+            </button>]
+        );
     };
 
     return (

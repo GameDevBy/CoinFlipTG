@@ -32,3 +32,25 @@ export const createGame = async (requestData) => {
         console.error("Error creating game:", error);
     }
 };
+
+export const deleteGame = async (gameId) => {
+    try {
+        const response = await fetch(`${host}/api/games/${gameId}`, {
+            method: "DELETE",
+        });
+        return response.ok
+    } catch (error) {
+        console.error("Error creating game:", error);
+    }
+};
+
+export const joinGame = async (telegramId, gameId) => {
+    try {
+        const response = await fetch(`${host}/api/games/${telegramId}/${gameId}`, {
+            method: "PUT",
+        });
+        return await response.json()
+    } catch (error) {
+        console.error("Error creating game:", error);
+    }
+};

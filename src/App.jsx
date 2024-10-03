@@ -37,6 +37,9 @@ function App() {
     useEffect(() => {
         if (games.length > 0) {
             const currentActiveGame = games.find(game => game.state === GameState.IN_PROGRESS && game.opponentId === initUser.telegramId)
+            console.log(games)
+            console.log(currentActiveGame)
+            console.log(initUser)
             setActiveGame(currentActiveGame)
         }
     }, [games]);
@@ -76,7 +79,7 @@ function App() {
 
     const handleCreateGame = async () => {
         const requestData = {
-            initiatorId: initUser.id,
+            initiatorId: initUser.telegramId,
             initiatorUsername: initUser.username,
             bet: bet,
             initiatorChoice: choice.toLocaleUpperCase(),
@@ -228,7 +231,7 @@ function App() {
             {activeTab === "games" && (
                 <div className="content active">
                     <h2>Current Games</h2>
-                    <GamesContent initUser={initUser} games={games}/>
+                    <GamesContent initUser={initUser} games={games} setGames={setGames} setActiveGame={setActiveGame}/>
                 </div>
             )}
             <ActiveGameRoom
