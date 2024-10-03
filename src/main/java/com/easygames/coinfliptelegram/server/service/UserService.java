@@ -46,6 +46,15 @@ public class UserService {
         }
     }
 
+    public UserDto getUser(Long telegramId) {
+        Optional<User> optionalUser = userRepository.findByTelegramId(telegramId);
+        if (optionalUser.isPresent()) {
+            return modelMapper.map(optionalUser, UserDto.class);
+        } else {
+            return null;
+        }
+    }
+
     public Optional<Long> getChatIdByUsername(String username) throws Exception {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new Exception("User not found"));
         return Optional.ofNullable(user.getTelegramId());

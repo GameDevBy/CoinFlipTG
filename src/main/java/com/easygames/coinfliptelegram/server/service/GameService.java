@@ -25,7 +25,7 @@ public class GameService {
 
     public List<GameDto> getGames() {
         return gameRepository.findAll().stream()
-                .filter(game -> GameState.WAITING_FOR_OPPONENT == game.getState())
+                .filter(game -> GameState.FINISHED != game.getState())
                 .sorted((Comparator.comparing(Game::getCreatedAt)))
                 .map(game -> modelMapper.map(game, GameDto.class))
                 .toList();
@@ -49,11 +49,12 @@ public class GameService {
     }
 
 
-    public void joinGame(UserDto userDto, GameDto gameDto) {
+    public GameDto joinGame(UserDto userDto, GameDto gameDto) {
         gameDto.setOpponentId(userDto.getTelegramId());
         gameDto.setOpponentUsername(userDto.getUsername());
         gameDto.setState(GameState.IN_PROGRESS);
         gameRepository.save(modelMapper.map(gameDto,Game.class));
+        return gameDto;
     }
 
     public GameDto getGame(String id) {
@@ -72,5 +73,9 @@ public class GameService {
     public boolean isGameFinished(String gameCode) {
         GameDto game = getGameByGameCode(gameCode);
         return game == null || game.getState() == GameState.FINISHED;
+    }
+
+    public void deleteGame(String gameId) {
+        gameRepository.deleteById(gameId);
     }
 }

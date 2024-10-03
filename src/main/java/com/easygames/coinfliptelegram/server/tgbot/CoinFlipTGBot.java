@@ -22,7 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -75,12 +74,10 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         String messageText = message.getText();
         long chatId = message.getChatId();
         String username = message.getFrom().getUserName();
-        System.out.println(chatId);
-        System.out.println(MIN_BET_AMOUNT);
         if (messageText.startsWith("/start") || messageText.equals("/play")) {
             if (messageText.length() > 7) { // If there's a game code after /start
-                String gameCode = messageText.substring(7).trim();
-                    joinGame(chatId, gameCode, username);
+                String gameCode = messageText.substring("/start game_".length()).trim();
+                joinGame(chatId, gameCode, username);
             } else {
                 sendOpenAppMessage(chatId, "Welcome to Coin Flip!", "Play");
             }
@@ -97,6 +94,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 ////                handleCustomBet(chatId, username, betAmount, game);
 //            }
 //        }
+        log.info("Message: {}", messageText);
+        log.info("ChatId: {}", chatId);
     }
 
     //    private void handleCallbackQuery(CallbackQuery callbackQuery) throws TelegramApiException {
@@ -131,7 +130,7 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //
 
 
-//    private void handlePlayCommand(long chatId, String username) throws TelegramApiException {
+    //    private void handlePlayCommand(long chatId, String username) throws TelegramApiException {
 //        User user = gameService.getOrCreateUser(chatId, username);
 //        if (user.getFlipky() < MIN_BET_AMOUNT) {
 //            sendMessage(chatId, "You don't have enough flipky to play. Please wait for daily bonus.");
@@ -291,15 +290,20 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
             sendOpenAppMessage(telegramId, text, "Open");
             return;
         }
-        UserDto user = userService.getUser(telegramId,username);
-        GameDto game = gameService.getGame(gameCode);
+        UserDto user = userService.getUser(telegramId, username);
+        GameDto game = gameService.getGameByGameCode(gameCode);
+        if (user.getTelegramId() == game.getInitiatorId()) {
+            String text = "You can't play against yourself.\nYou can join another game or create your own.";
+            sendOpenAppMessage(telegramId, text, "Open");
+            return;
+        }
         if (user.getScore().getFlipkyBalance() < game.getBet()) {
-            String text = "You don't have enough flipky to play.\nYou can join another or create your own game.";
+            String text = "You don't have enough flipky to play.\nYou can join another game or create your own.";
             sendOpenAppMessage(telegramId, text, "Open");
             return;
         }
         gameService.joinGame(user, game);
-        String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorId());
+        String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorUsername());
         sendOpenAppMessage(telegramId, text, "Continue");
     }
 
@@ -319,7 +323,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
                 .build();
         telegramClient.execute(message);
     }
-//    private void handleChoice(long chatId, String gameCode, String choice) throws TelegramApiException {
+
+    //    private void handleChoice(long chatId, String gameCode, String choice) throws TelegramApiException {
 //        if (!gameService.canMakeChoice(chatId, gameCode)) {
 //            sendMessage(chatId, "It's not your turn or you're not in this game.");
 //            return;
@@ -388,7 +393,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
                 .callbackData(callbackData)
                 .build();
     }
-//
+
+    //
 //    private void sendMessage(long chatId, String text) throws TelegramApiException {
 //        SendMessage message = SendMessage.builder()
 //                .chatId(String.valueOf(chatId))

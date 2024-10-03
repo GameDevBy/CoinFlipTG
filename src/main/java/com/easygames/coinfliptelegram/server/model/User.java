@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
     @Id
     private String id;
-    private Long telegramId;
+    private long telegramId;
     private String username;
     private Score score;
 

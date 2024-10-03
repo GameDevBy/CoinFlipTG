@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JoinGameRequest {
-    private Long userId;
+    private long userId;
     private String gameId;
 }

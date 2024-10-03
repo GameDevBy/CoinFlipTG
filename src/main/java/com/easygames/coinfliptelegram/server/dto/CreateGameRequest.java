@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateGameRequest {
-    private Long initiatorId;
+    private long initiatorId;
     private String initiatorUsername;
     private int bet;
     private GameChoice initiatorChoice;
