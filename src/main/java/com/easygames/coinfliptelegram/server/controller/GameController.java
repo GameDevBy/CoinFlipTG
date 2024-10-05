@@ -62,6 +62,7 @@ public class GameController {
     public ResponseEntity<GameDto> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
         GameDto updatedGame = gameService.flipCoin(game);
+        bot.sendResultMessages(updatedGame);
         return ResponseEntity.ok(updatedGame);
     }
 

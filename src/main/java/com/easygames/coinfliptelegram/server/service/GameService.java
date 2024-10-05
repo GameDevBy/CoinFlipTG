@@ -134,7 +134,7 @@ public class GameService {
         gameRepository.save(modelMapper.map(game, Game.class));
 
         int bet = game.getBet(); // You can make this dynamic based on user input
-        updateUserScore(game.getInitiatorId(), initiatorWins ? bet * 2 : -bet * 2, initiatorWins);
+        updateUserScore(game.getInitiatorId(), initiatorWins ? (bet * 2) : -(bet * 2), initiatorWins);
         updateUserScore(game.getOpponentId(), initiatorWins ? -bet : bet, !initiatorWins);
         return game;
     }

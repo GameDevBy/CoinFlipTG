@@ -38,9 +38,7 @@ public class UserService {
     public UserDto getUser(Long telegramId, String username) {
         Optional<User> optionalUser = userRepository.findByTelegramId(telegramId);
         if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            Score score = user.getScore();
-            return modelMapper.map(user, UserDto.class);
+            return modelMapper.map(optionalUser.get(), UserDto.class);
         } else {
             return saveUser(telegramId, username);
         }

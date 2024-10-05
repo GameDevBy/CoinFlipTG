@@ -285,27 +285,33 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //
 //    }
 //
-    private void joinGame(long telegramId, String gameCode, String username) throws TelegramApiException {
-        if (gameService.isGameFinished(gameCode)) {
-            String text = "This game has already finished. You can start a new game.";
-            sendOpenAppMessage(telegramId, text, "Open");
-            return;
+    private void joinGame(long telegramId, String gameCode, String username) {
+        try {
+            if (gameService.isGameFinished(gameCode)) {
+                String text = "This game has already finished. You can start a new game.";
+                sendOpenAppMessage(telegramId, text, "Open");
+                return;
+            }
+            UserDto user = userService.getUser(telegramId, username);
+            GameDto game = gameService.getGameByGameCode(gameCode);
+            if (user.getTelegramId().equals(game.getInitiatorId())) {
+                String text = "You can't play against yourself.\nYou can join another game or create your own.";
+                sendOpenAppMessage(telegramId, text, "Open");
+                return;
+            }
+            if (user.getScore().getFlipkyBalance() < game.getBet()) {
+                String text = "You don't have enough flipky to play.\nYou can join another game or create your own.";
+                sendOpenAppMessage(telegramId, text, "Open");
+                return;
+            }
+            gameService.joinGame(user, game);
+            String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorUsername());
+            String initiatorText = String.format("%s joined your game.", username);
+            sendMessage(game.getInitiatorId(), initiatorText);
+            sendOpenAppMessage(telegramId, text, "Continue");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-        UserDto user = userService.getUser(telegramId, username);
-        GameDto game = gameService.getGameByGameCode(gameCode);
-        if (user.getTelegramId().equals(game.getInitiatorId())) {
-            String text = "You can't play against yourself.\nYou can join another game or create your own.";
-            sendOpenAppMessage(telegramId, text, "Open");
-            return;
-        }
-        if (user.getScore().getFlipkyBalance() < game.getBet()) {
-            String text = "You don't have enough flipky to play.\nYou can join another game or create your own.";
-            sendOpenAppMessage(telegramId, text, "Open");
-            return;
-        }
-        gameService.joinGame(user, game);
-        String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorUsername());
-        sendOpenAppMessage(telegramId, text, "Continue");
     }
 
     public void joinGameMessage(Long telegramId, String username) throws TelegramApiException {
@@ -316,6 +322,21 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
     public void cancelGameMessage(long telegramId, String username, int bet, GameChoice choice) throws TelegramApiException {
         String text = String.format("%s cancelled the game with you.\n Bet: %s, Choice: %s", username, bet, choice);
         sendMessage(telegramId, text);
+    }
+
+    public void sendResultMessages(GameDto game) {
+        try {
+            String winText = "Congrats! You win!";
+            String lossText = "Sorry, but you loss.";
+            boolean isInitiatorWins = game.getResult().isInitiatorWins();
+            String initiatorText = String.format("Game result vs %s:\nThe coin landed on %s.\n%s", game.getOpponentUsername(), game.getResult().coinResult(), isInitiatorWins ? winText : lossText);
+            String opponentText = String.format("Game result vs %s:\nThe coin landed on %s.\n%s", game.getInitiatorUsername(), game.getResult().coinResult(), isInitiatorWins ? lossText : winText);
+            Long initiatorId = game.getInitiatorId();
+            sendMessage(initiatorId, initiatorText);
+            sendMessage(game.getOpponentId(), opponentText);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private void sendOpenAppMessage(long chatId, String messageText, String buttonText) throws TelegramApiException {
@@ -414,7 +435,7 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         telegramClient.execute(message);
     }
 
-//    private void sendMessageWithChoiceButtons(long chatId, String text, String gameCode) throws TelegramApiException {
+    //    private void sendMessageWithChoiceButtons(long chatId, String text, String gameCode) throws TelegramApiException {
 //        SendMessage message = createMessageWithKeyboard(chatId, text,
 //                List.of(
 //                        createButton("Heads", "choice_heads_" + gameCode),
@@ -434,4 +455,6 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
     public void afterRegistration(BotSession botSession) {
         log.info("Bot registered. Running state: {}", botSession.isRunning());
     }
+
+
 }

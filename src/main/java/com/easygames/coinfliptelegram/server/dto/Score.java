@@ -14,4 +14,6 @@ public class Score {
     private int losses;
     private int playedGames;
     private int flipkyBalance;
+    private int totalWinFlipky;
+    private int totalLossFlipky;
 }
