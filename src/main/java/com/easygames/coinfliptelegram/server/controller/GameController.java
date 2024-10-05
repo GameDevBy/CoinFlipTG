@@ -5,19 +5,24 @@ import com.easygames.coinfliptelegram.server.dto.GameDto;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
 import com.easygames.coinfliptelegram.server.service.GameService;
 import com.easygames.coinfliptelegram.server.service.UserService;
+import com.easygames.coinfliptelegram.server.tgbot.CoinFlipTGBot;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/games")
 @AllArgsConstructor
-public class GamesController {
+public class GameController {
 
     private final GameService gameService;
     private final UserService userService;
+    private final CoinFlipTGBot bot;
 
     @PostMapping()
     public ResponseEntity<GameDto> createGame(@RequestBody CreateGameRequest request) {
@@ -25,11 +30,38 @@ public class GamesController {
         return ResponseEntity.ok(game);
     }
 
-    @PutMapping("{telegramId}/{gameId}")
-    public ResponseEntity<GameDto> joinmGame(@PathVariable long telegramId, @PathVariable String gameId) {
-        UserDto user = userService.getUser(telegramId);
+    @PutMapping("{telegramId}/{gameId}/join")
+    public ResponseEntity<GameDto> joinGame(@PathVariable long telegramId, @PathVariable String gameId) {
+        try {
+            UserDto user = userService.getUser(telegramId);
+            GameDto game = gameService.getGame(gameId);
+            GameDto updatedGame = gameService.joinGame(user, game);
+            bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername());
+            return ResponseEntity.ok(updatedGame);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @PutMapping("/{gameId}/cancel")
+    public ResponseEntity<GameDto> cancelGame(@PathVariable String gameId) {
+        try {
+            GameDto game = gameService.getGame(gameId);
+            String opponentUsername = game.getOpponentUsername();
+            GameDto updatedGame = gameService.cancelGame(game);
+            bot.cancelGameMessage(game.getInitiatorId(), opponentUsername, game.getBet(), game.getInitiatorChoice());
+            return ResponseEntity.ok(updatedGame);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @PutMapping("/{gameId}/flip")
+    public ResponseEntity<GameDto> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
-        GameDto updatedGame = gameService.joinGame(user, game);
+        GameDto updatedGame = gameService.flipCoin(game);
         return ResponseEntity.ok(updatedGame);
     }
 

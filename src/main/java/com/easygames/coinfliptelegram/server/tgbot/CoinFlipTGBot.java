@@ -2,6 +2,7 @@ package com.easygames.coinfliptelegram.server.tgbot;
 
 import com.easygames.coinfliptelegram.server.dto.GameDto;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
+import com.easygames.coinfliptelegram.server.model.GameChoice;
 import com.easygames.coinfliptelegram.server.service.GameService;
 import com.easygames.coinfliptelegram.server.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -292,7 +293,7 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         }
         UserDto user = userService.getUser(telegramId, username);
         GameDto game = gameService.getGameByGameCode(gameCode);
-        if (user.getTelegramId() == game.getInitiatorId()) {
+        if (user.getTelegramId().equals(game.getInitiatorId())) {
             String text = "You can't play against yourself.\nYou can join another game or create your own.";
             sendOpenAppMessage(telegramId, text, "Open");
             return;
@@ -305,6 +306,16 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         gameService.joinGame(user, game);
         String text = String.format("You joined the game with %s.\n Please open the app to continue!", game.getInitiatorUsername());
         sendOpenAppMessage(telegramId, text, "Continue");
+    }
+
+    public void joinGameMessage(Long telegramId, String username) throws TelegramApiException {
+        String text = String.format("You joined the game with %s.", username);
+        sendMessage(telegramId, text);
+    }
+
+    public void cancelGameMessage(long telegramId, String username, int bet, GameChoice choice) throws TelegramApiException {
+        String text = String.format("%s cancelled the game with you.\n Bet: %s, Choice: %s", username, bet, choice);
+        sendMessage(telegramId, text);
     }
 
     private void sendOpenAppMessage(long chatId, String messageText, String buttonText) throws TelegramApiException {
@@ -394,16 +405,15 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
                 .build();
     }
 
-    //
-//    private void sendMessage(long chatId, String text) throws TelegramApiException {
-//        SendMessage message = SendMessage.builder()
-//                .chatId(String.valueOf(chatId))
-//                .text(text)
-//                .build();
-//        telegramClient.execute(message);
-//    }
-//
-//
+
+    private void sendMessage(long chatId, String text) throws TelegramApiException {
+        SendMessage message = SendMessage.builder()
+                .chatId(String.valueOf(chatId))
+                .text(text)
+                .build();
+        telegramClient.execute(message);
+    }
+
 //    private void sendMessageWithChoiceButtons(long chatId, String text, String gameCode) throws TelegramApiException {
 //        SendMessage message = createMessageWithKeyboard(chatId, text,
 //                List.of(

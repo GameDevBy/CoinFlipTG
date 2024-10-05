@@ -17,9 +17,9 @@ public class Game {
     @Id
     private String id;
     private String gameCode;
-    private long initiatorId;
+    private Long initiatorId;
     private String initiatorUsername;
-    private long opponentId;
+    private Long opponentId;
     private String opponentUsername;
     private int bet;
     private GameChoice initiatorChoice;

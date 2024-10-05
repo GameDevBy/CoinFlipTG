@@ -10,9 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Score {
-    private int winsAmount;
-    private int lossAmount;
-    private int playedGamesAmount;
+    private int wins;
+    private int losses;
+    private int playedGames;
     private int flipkyBalance;
-
 }

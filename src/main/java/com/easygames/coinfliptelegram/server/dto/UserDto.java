@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDto {
     private String userId;
-    private long telegramId;
+    private Long telegramId;
     private String username;
     private Score score;
 }
