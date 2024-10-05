@@ -5,6 +5,7 @@ const tg = window.Telegram.WebApp;
 export function useTelegram() {
 
     useEffect(() => {
+        tg.expand()
         tg.ready();
     }, []);
 
@@ -12,11 +13,9 @@ export function useTelegram() {
         tg.close()
     }
 
-
     return {
         onClose,
         tg,
         webAppUser: tg.initDataUnsafe.user,
-        queryId: tg.initDataUnsafe.query_id,
     }
 }

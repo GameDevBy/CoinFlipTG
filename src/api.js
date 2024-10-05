@@ -1,10 +1,9 @@
-const host = process.env.REACT_APP_SERVER_HOST
+const host = process.env.REACT_APP_SERVER_HOST //http://localhost:8080
 export const fetchUserData = async (user,setInitUser, setScore) => {
     try {
         const response = await fetch(`${host}/api/users/${user.telegramId}/${user.username}`);
         const userData = await response.json();
         setInitUser(userData)
-        setScore(userData.score);
     } catch (error) {
         console.error("Error fetching user data:", error);
     }
@@ -40,17 +39,39 @@ export const deleteGame = async (gameId) => {
         });
         return response.ok
     } catch (error) {
-        console.error("Error creating game:", error);
+        console.error("Error deleting game:", error);
     }
 };
 
 export const joinGame = async (telegramId, gameId) => {
     try {
-        const response = await fetch(`${host}/api/games/${telegramId}/${gameId}`, {
+        const response = await fetch(`${host}/api/games/${telegramId}/${gameId}/join`, {
             method: "PUT",
         });
         return await response.json()
     } catch (error) {
-        console.error("Error creating game:", error);
+        console.error("Error join game:", error);
+    }
+};
+
+export const flipCoin = async (gameId) => {
+    try {
+        const response = await fetch(`${host}/api/games/${gameId}/flip`, {
+            method: "PUT",
+        });
+        return await response.json()
+    } catch (error) {
+        console.error("Error join game:", error);
+    }
+};
+
+export const cancelGame = async (gameId) => {
+    try {
+        const response = await fetch(`${host}/api/games/${gameId}/cancel`, {
+            method: "PUT",
+        });
+        return await response.json()
+    } catch (error) {
+        console.error("Error cancel game:", error);
     }
 };
