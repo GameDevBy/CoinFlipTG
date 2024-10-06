@@ -3,6 +3,7 @@ package com.easygames.coinfliptelegram.server.controller;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
 import com.easygames.coinfliptelegram.server.dto.GameDto;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
+import com.easygames.coinfliptelegram.server.model.GameState;
 import com.easygames.coinfliptelegram.server.service.GameService;
 import com.easygames.coinfliptelegram.server.service.UserService;
 import com.easygames.coinfliptelegram.server.tgbot.CoinFlipTGBot;
@@ -30,14 +31,18 @@ public class GameController {
         return ResponseEntity.ok(game);
     }
 
-    @PutMapping("{telegramId}/{gameId}/join")
-    public ResponseEntity<GameDto> joinGame(@PathVariable long telegramId, @PathVariable String gameId) {
+    @PutMapping("{userId}/{gameId}/join")
+    public ResponseEntity<GameDto> joinGame(@PathVariable String userId, @PathVariable String gameId) {
         try {
-            UserDto user = userService.getUser(telegramId);
+            UserDto user = userService.getUser(userId);
             GameDto game = gameService.getGame(gameId);
-            GameDto updatedGame = gameService.joinGame(user, game);
-            bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername());
-            return ResponseEntity.ok(updatedGame);
+            if (game.getState().equals(GameState.WAITING_FOR_OPPONENT)){
+                GameDto updatedGame = gameService.joinGame(user, game);
+                bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername());
+                return ResponseEntity.ok(updatedGame);
+            } else{
+                return null;
+            }
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
             return null;

@@ -9,9 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private String id;
-    private Long telegramId;
+public class LoginRequest {
+    private long telegramId;
     private String username;
-    private Score score;
 }

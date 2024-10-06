@@ -44,6 +44,15 @@ public class UserService {
         }
     }
 
+    public UserDto getUser(String userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            return modelMapper.map(optionalUser, UserDto.class);
+        } else {
+            return null;
+        }
+    }
+
     public UserDto getUser(Long telegramId) {
         Optional<User> optionalUser = userRepository.findByTelegramId(telegramId);
         if (optionalUser.isPresent()) {
