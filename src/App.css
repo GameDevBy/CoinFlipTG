@@ -46,7 +46,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0 20px 20px 20px;
 }
@@ -62,18 +62,22 @@ body {
 .tabs {
     display: flex;
     margin-bottom: 20px;
-    gap: 10px;
+    gap: 4px;
 }
 
 .tab {
     flex: 1;
-    padding: 10px;
+    padding: 10px 2px;
     text-align: center;
     background-color: #ffffff;
     cursor: pointer;
     border-radius: 15px 15px 0 0;
     border: 2px solid black;
     border-bottom: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .tab.active {
@@ -206,16 +210,50 @@ body {
 .active-game-dialog,
 .score-dialog {
     position: fixed;
-    top: 25%;
+    width: 55%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: white;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 15px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     gap: 15px;
 }
 
+.modal-overlay {
+    position: fixed;
+    width: 55%;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    gap: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.modal-buttons button{
+    width: auto;
+}
 
 

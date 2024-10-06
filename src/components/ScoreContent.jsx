@@ -15,6 +15,7 @@ const ScoreContent = ({score}) => {
                 setShowScore(false);
             }
         }
+
         window.addEventListener("mousedown", handleClickOutside);
         return () => {
             window.removeEventListener("mousedown", handleClickOutside);
@@ -51,7 +52,12 @@ const ScoreContent = ({score}) => {
                     </button>
                     {showScore &&
                         <div onClick={(e) => e.stopPropagation()} ref={scoreDialogRef} className="score-dialog">
-                            <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between"}}>
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between",
+                                width: "100%",
+                            }}>
                                 <p>
                                     Games: <span>{score.playedGames}</span>
                                 </p>
@@ -60,6 +66,13 @@ const ScoreContent = ({score}) => {
                                 </p>
                                 <p>
                                     Losses: <span>{score.losses}</span>
+                                </p>
+                                <p>
+                                    Total win flipky: <span
+                                    style={{color: "green"}}>{score.totalWinFlipky}</span>
+                                </p>
+                                <p>
+                                    Total loss flipky: <span style={{color: "red"}}>{score.totalLossFlipky}</span>
                                 </p>
                                 <p>Wins rate:{" "}
                                     <span style={{

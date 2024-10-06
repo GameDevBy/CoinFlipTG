@@ -4,6 +4,8 @@ export const Tab = {
     home: "Home",
     games: "Games",
     shop: "Shop",
+    history: "History",
+    rating: "Rating"
 }
 
 export const tabs = Object.values(Tab);

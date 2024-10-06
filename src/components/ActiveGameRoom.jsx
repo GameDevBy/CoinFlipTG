@@ -1,13 +1,15 @@
 import React from 'react';
 import {cancelGame, flipCoin} from "../api";
 
-const ActiveGameRoom = ({initUser, game, setActiveGame}) => {
+const ActiveGameRoom = ({initUser, game, setActiveGame, games, setGames}) => {
     if (!game) return null;
 
     const handleFlipCoin = async () => {
         try {
+
             const result = await flipCoin(game.id);
-            console.log(result)
+            const updatedGames = games.filter(g => g.id === game.id)
+            setGames(updatedGames)
             setActiveGame(result);
         } catch (error) {
             console.error("Error flipping coin:", error);
@@ -17,6 +19,7 @@ const ActiveGameRoom = ({initUser, game, setActiveGame}) => {
     const handleCancelGame = async () => {
         try {
             const result = await cancelGame(game.id)
+            const updatedGames = games.map(g => g.id === game.id ? result : g)
             setActiveGame(null)
         } catch (error) {
             console.error("Error flipping coin:", error);
@@ -34,8 +37,8 @@ const ActiveGameRoom = ({initUser, game, setActiveGame}) => {
                                 className="join-game-btn"
                                 onClick={handleFlipCoin}>Flip Coin
                         </button>
-                        <button style={{padding: "10px", width: "100px", borderRadius: "15px"}}
-                                className="delete-game-btn"
+                        <button style={{padding: "10px", borderRadius: "15px"}}
+                                className="button"
                                 onClick={handleCancelGame}>Cancel
                         </button>
                     </div>

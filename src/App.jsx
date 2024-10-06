@@ -78,17 +78,28 @@ function App() {
                 <HomeContent initUser={initUser} setInitUser={setInitUser} games={games} setGames={setGames}/>
             )}
             {activeTab === Tab.games && (
-                <GamesContent initUser={initUser} setInitUser={setInitUser} games={games} setGames={setGames} setActiveGame={setActiveGame}/>
+                <GamesContent initUser={initUser} setInitUser={setInitUser} games={games} setGames={setGames}
+                              setActiveGame={setActiveGame}/>
             )}
             {activeTab === Tab.shop && (
                 <div style={{textAlign: "center", marginTop: "140px"}}>
-                  <h2>Coming soon...</h2>
+                    <h2>Coming soon...</h2>
                 </div>
-            )}
+            )} {activeTab === Tab.history && (
+            <div style={{textAlign: "center", marginTop: "140px"}}>
+                <h2>Coming soon...</h2>
+            </div>
+        )} {activeTab === Tab.rating && (
+            <div style={{textAlign: "center", marginTop: "140px"}}>
+                <h2>Coming soon...</h2>
+            </div>
+        )}
             <ActiveGameRoom
                 initUser={initUser}
                 game={activeGame}
                 setActiveGame={setActiveGame}
+                games={games}
+                setGames={setGames}
             />
         </div>
     );

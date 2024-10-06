@@ -1,7 +1,11 @@
-const host = process.env.REACT_APP_SERVER_HOST //http://localhost:8080
-export const fetchUserData = async (user,setInitUser, setScore) => {
+const host = process.env.REACT_APP_SERVER_HOST //"http://localhost:8080"
+export const fetchUserData = async (user, setInitUser, setScore) => {
     try {
-        const response = await fetch(`${host}/api/users/${user.telegramId}/${user.username}`);
+        const response = await fetch(`${host}/api/users`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(user),
+        });
         const userData = await response.json();
         setInitUser(userData)
     } catch (error) {
@@ -43,9 +47,9 @@ export const deleteGame = async (gameId) => {
     }
 };
 
-export const joinGame = async (telegramId, gameId) => {
+export const joinGame = async (userId, gameId) => {
     try {
-        const response = await fetch(`${host}/api/games/${telegramId}/${gameId}/join`, {
+        const response = await fetch(`${host}/api/games/${userId}/${gameId}/join`, {
             method: "PUT",
         });
         return await response.json()

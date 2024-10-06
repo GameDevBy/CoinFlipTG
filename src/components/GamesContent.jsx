@@ -2,34 +2,54 @@ import React, {useState} from 'react';
 import {createGameUrl, createShareUrl, formatDate} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
 import {deleteGame, joinGame} from "../api";
+import ConfirmModal from "./ConfirmModal";
 
 const GamesContent = ({games, initUser, setInitUser, setGames, setActiveGame}) => {
     const {tg} = useTelegram()
     const [activeGameId, setActiveGameId] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [gameToDelete, setGameToDelete] = useState(null);
+
     const handleGameClick = (gameId) => {
         setActiveGameId(activeGameId === gameId ? null : gameId);
     };
 
-    const handleDeleteGame = async (e, game) => {
-        e.preventDefault()
-        try {
-            const isDelete = await deleteGame(game.id);
-            if (isDelete) {
-                const updatedArray = games.filter(el => el.id !== game.id)
-                setGames(updatedArray)
-                setInitUser(prevUser => ({
-                    ...prevUser,
-                    score: {
-                        ...prevUser.score,
-                        flipkyBalance: prevUser.score.flipkyBalance + game.bet
-                    }
-                }));
-                console.log(`Deleting game with id: ${game.id}`);
-            }
-        } catch (err) {
-            console.error(err)
-        }
+    const handleDeleteGame = (e, game) => {
+        e.preventDefault();
+        setGameToDelete(game);
+        setShowConfirmModal(true);
     };
+
+    const cancelDelete = () => {
+        setShowConfirmModal(false);
+        setGameToDelete(null);
+    };
+
+    const confirmDelete = async () => {
+        if (gameToDelete) {
+            try {
+                const isDelete = await deleteGame(gameToDelete.id);
+                if (isDelete) {
+                    const updatedArray = games.filter(el => el.id !== gameToDelete.id);
+                    setGames(updatedArray);
+                    setInitUser(prevUser => ({
+                        ...prevUser,
+                        score: {
+                            ...prevUser.score,
+                            flipkyBalance: prevUser.score.flipkyBalance + gameToDelete.bet
+                        }
+                    }));
+                    console.log(`Deleting game with id: ${gameToDelete.id}`);
+                }
+            } catch (err) {
+                console.error(err);
+                // Handle error (maybe show an error message)
+            }
+        }
+        setShowConfirmModal(false);
+        setGameToDelete(null);
+    };
+
     const handleShareGame = (e, game) => {
         e.preventDefault();
         const gameUrl = createGameUrl(game);
@@ -41,11 +61,14 @@ const GamesContent = ({games, initUser, setInitUser, setGames, setActiveGame}) =
     const handleJoinGame = async (e, game) => {
         e.preventDefault();
         try {
-            const joinedGame = await joinGame(initUser.telegramId, game.id);
+            const joinedGame = await joinGame(initUser.id, game.id);
             if (joinedGame) {
                 setActiveGame(joinedGame)
+            }else {
+                alert("This game is already finished or in progress. Please choose another game.");
             }
         } catch (err) {
+            alert("Something went wrong. Please try another game.")
             console.error(err)
         }
     };
@@ -108,6 +131,13 @@ const GamesContent = ({games, initUser, setInitUser, setGames, setActiveGame}) =
                     ))}
                 </div>
             </div>
+            {showConfirmModal && (
+                <ConfirmModal
+                    message={`Are you sure you want to delete this game?`}
+                    onConfirm={confirmDelete}
+                    onCancel={cancelDelete}
+                />
+            )}
         </div>
     );
 };
