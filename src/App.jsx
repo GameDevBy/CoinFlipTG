@@ -33,7 +33,9 @@ function App() {
     useEffect(() => {
         if (games.length > 0 && initUser) {
             const currentActiveGame = games.find(game => game.state === GameState.IN_PROGRESS && game.opponentId === initUser.telegramId)
-            setActiveGame(currentActiveGame)
+            if (currentActiveGame) {
+                setActiveGame(currentActiveGame)
+            }
         }
     }, [games, initUser]);
 
@@ -99,14 +101,14 @@ function App() {
             </div>
         )}
             {activeGame &&
-            <ActiveGameRoom
-                score={score}
-                setScore={setScore}
-                game={activeGame}
-                setActiveGame={setActiveGame}
-                games={games}
-                setGames={setGames}
-            />}
+                <ActiveGameRoom
+                    score={score}
+                    setScore={setScore}
+                    game={activeGame}
+                    setActiveGame={setActiveGame}
+                    games={games}
+                    setGames={setGames}
+                />}
         </div>
     );
 }

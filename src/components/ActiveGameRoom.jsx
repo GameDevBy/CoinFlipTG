@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {cancelGame, flipCoin} from "../api";
 
 const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames}) => {
+
     const handleFlipCoin = async () => {
         try {
             const result = await flipCoin(game.id);
@@ -9,7 +10,7 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
             const isWin = !result.isInitiatorWins
             const newScore = {
                 wins: isWin ? score.wins + 1 : score.wins,
-                losses: isWin ? score.losses + 1 : score.losses,
+                losses: isWin ? score.losses : score.losses + 1,
                 playedGames: score.playedGames + 1,
                 flipkyBalance: isWin ? score.flipkyBalance + game.bet : score.flipkyBalance - game.bet,
                 totalWinFlipky: isWin ? score.totalWinFlipky + game.bet : score.totalWinFlipky,
@@ -55,7 +56,10 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
                     <p>Coin shows: {game.result.coinResult}</p>
                     <p>You {game.result.isInitiatorWins ? "loss." : "win!"} </p>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
-                        <button style={{width: "100px", textAlign: "center"}} className="delete-game-btn" onClick={() => setActiveGame(null)}>
+                        <button style={{width: "100px", textAlign: "center"}} className="delete-game-btn"
+                                onClick={() => {
+                                    setActiveGame(null)
+                                }}>
                             Close
                         </button>
                     </div>
