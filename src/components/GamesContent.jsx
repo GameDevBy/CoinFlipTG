@@ -4,7 +4,7 @@ import {useTelegram} from "../hooks/useTelegram";
 import {deleteGame, joinGame} from "../api";
 import ConfirmModal from "./ConfirmModal";
 
-const GamesContent = ({games, initUser, setInitUser, setGames, setActiveGame}) => {
+const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
     const {tg} = useTelegram()
     const [activeGameId, setActiveGameId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -32,12 +32,9 @@ const GamesContent = ({games, initUser, setInitUser, setGames, setActiveGame}) =
                 if (isDelete) {
                     const updatedArray = games.filter(el => el.id !== gameToDelete.id);
                     setGames(updatedArray);
-                    setInitUser(prevUser => ({
-                        ...prevUser,
-                        score: {
-                            ...prevUser.score,
-                            flipkyBalance: prevUser.score.flipkyBalance + gameToDelete.bet
-                        }
+                    setScore(prevScore => ({
+                        ...prevScore,
+                        flipkyBalance: prevScore.flipkyBalance + gameToDelete.bet
                     }));
                     console.log(`Deleting game with id: ${gameToDelete.id}`);
                 }

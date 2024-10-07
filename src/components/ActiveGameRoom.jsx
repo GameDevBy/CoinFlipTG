@@ -1,16 +1,23 @@
 import React from 'react';
 import {cancelGame, flipCoin} from "../api";
 
-const ActiveGameRoom = ({initUser, game, setActiveGame, games, setGames}) => {
-    if (!game) return null;
-
+const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames}) => {
     const handleFlipCoin = async () => {
         try {
-
             const result = await flipCoin(game.id);
-            const updatedGames = games.filter(g => g.id === game.id)
+            const updatedGames = games.filter(g => g.id !== game.id)
+            const isWin = !result.isInitiatorWins
+            const newScore = {
+                wins: isWin ? score.wins + 1 : score.wins,
+                losses: isWin ? score.losses + 1 : score.losses,
+                playedGames: score.playedGames + 1,
+                flipkyBalance: isWin ? score.flipkyBalance + game.bet : score.flipkyBalance - game.bet,
+                totalWinFlipky: isWin ? score.totalWinFlipky + game.bet : score.totalWinFlipky,
+                totalLossFlipky: !isWin ? score.totalLossFlipky + game.bet : score.totalLossFlipky
+            }
             setGames(updatedGames)
-            setActiveGame(result);
+            setActiveGame({...game, result: result});
+            setScore(newScore)
         } catch (error) {
             console.error("Error flipping coin:", error);
         }
@@ -45,13 +52,12 @@ const ActiveGameRoom = ({initUser, game, setActiveGame, games, setGames}) => {
                 </div>
             ) : (
                 <div className="game-content">
-                    <p>Result: </p>
                     <p>Coin shows: {game.result.coinResult}</p>
                     <p>You {game.result.isInitiatorWins ? "loss." : "win!"} </p>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
-                        <butto style={{width: "100px"}} className="delete-game-btn" onClick={() => setActiveGame(null)}>
+                        <button style={{width: "100px", textAlign: "center"}} className="delete-game-btn" onClick={() => setActiveGame(null)}>
                             Close
-                        </butto>
+                        </button>
                     </div>
                 </div>
             )}

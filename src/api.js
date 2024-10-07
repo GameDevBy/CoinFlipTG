@@ -8,6 +8,7 @@ export const fetchUserData = async (user, setInitUser, setScore) => {
         });
         const userData = await response.json();
         setInitUser(userData)
+        setScore(userData.score)
     } catch (error) {
         console.error("Error fetching user data:", error);
     }

@@ -9,31 +9,34 @@ import ActiveGameRoom from "./components/ActiveGameRoom";
 import HomeContent from "./components/HomeContent";
 
 function App() {
-    const {webAppUser, tg} = useTelegram()
+    const {webAppUser, tg, isReady} = useTelegram()
     const [initUser, setInitUser] = useState();
+    const [score, setScore] = useState();
     const [activeTab, setActiveTab] = useState(Tab.home);
     const [games, setGames] = useState([]);
     const [activeGame, setActiveGame] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (webAppUser) {
+        if (webAppUser && isReady) {
             const user = {
                 telegramId: webAppUser?.id,
                 username: webAppUser?.username,
             };
             if (user?.telegramId) {
-                fetchUserData(user, setInitUser);
+                fetchUserData(user, setInitUser, setScore);
                 fetchGames(setGames);
             }
         }
-    }, [webAppUser]);
+    }, [webAppUser, isReady]);
 
     useEffect(() => {
-        if (games.length > 0) {
+        if (games.length > 0 && initUser) {
             const currentActiveGame = games.find(game => game.state === GameState.IN_PROGRESS && game.opponentId === initUser.telegramId)
             setActiveGame(currentActiveGame)
         }
-    }, [games]);
+    }, [games, initUser]);
+
 
     const joinGame = async () => {
         try {
@@ -49,7 +52,7 @@ function App() {
         }
     };
 
-    if (!initUser || !initUser.score) {
+    if (!initUser || !score) {
         return (
             <div className="content active">
                 <h2 style={{marginBottom: "20px"}}>Welcome to CoinFlip!</h2>
@@ -59,9 +62,10 @@ function App() {
     }
 
     return (
+        isLoading &&
         <div className="container">
             <div className="header">
-                {initUser.score && <ScoreContent score={initUser.score}/>}
+                {score && <ScoreContent score={score}/>}
                 <div className="tabs">
                     {tabs.map((tab) => (
                         <div
@@ -75,10 +79,10 @@ function App() {
                 </div>
             </div>
             {activeTab === Tab.home && (
-                <HomeContent initUser={initUser} setInitUser={setInitUser} games={games} setGames={setGames}/>
+                <HomeContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}/>
             )}
             {activeTab === Tab.games && (
-                <GamesContent initUser={initUser} setInitUser={setInitUser} games={games} setGames={setGames}
+                <GamesContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}
                               setActiveGame={setActiveGame}/>
             )}
             {activeTab === Tab.shop && (
@@ -94,13 +98,15 @@ function App() {
                 <h2>Coming soon...</h2>
             </div>
         )}
+            {activeGame &&
             <ActiveGameRoom
-                initUser={initUser}
+                score={score}
+                setScore={setScore}
                 game={activeGame}
                 setActiveGame={setActiveGame}
                 games={games}
                 setGames={setGames}
-            />
+            />}
         </div>
     );
 }

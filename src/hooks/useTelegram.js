@@ -1,21 +1,34 @@
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 
-const tg = window.Telegram.WebApp;
+const initTg = window.Telegram?.WebApp
 
 export function useTelegram() {
+    const [tg, setTg] = useState(null);
+    const [webAppUser, setUser] = useState(null);
 
     useEffect(() => {
-        tg.expand()
-        tg.ready();
-    }, []);
+        if (initTg) {
+            const webApp = window.Telegram.WebApp;
+            setTg(webApp);
+
+            try {
+                webApp.expand();
+                webApp.ready();
+                setUser(webApp.initDataUnsafe.user);
+            } catch (error) {
+                console.error('Error initializing Telegram Web App:', error);
+            }
+        }
+    }, [initTg]);
 
     const onClose = () => {
-        tg.close()
-    }
+        tg?.close();
+    };
 
     return {
         onClose,
         tg,
-        webAppUser: tg.initDataUnsafe.user,
-    }
+        webAppUser,
+        isReady: !!tg,
+    };
 }

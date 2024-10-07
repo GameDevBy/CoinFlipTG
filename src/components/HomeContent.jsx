@@ -4,7 +4,7 @@ import {createGame} from "../api";
 import {createGameUrl, createShareUrl} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
 
-const HomeContent = ({initUser,setInitUser, games, setGames}) => {
+const HomeContent = ({initUser,setScore, games, setGames}) => {
     const {tg} = useTelegram()
     const [isCreatingGame, setIsCreatingGame] = useState();
     const [lastCreatedGame, setLastCreatedGame] = useState();
@@ -33,12 +33,9 @@ const HomeContent = ({initUser,setInitUser, games, setGames}) => {
             initiatorChoice: choice.toLocaleUpperCase(),
         }
         const createdGame = await createGame(requestData)
-        setInitUser(prevUser => ({
-            ...prevUser,
-            score: {
-                ...prevUser.score,
-                flipkyBalance: prevUser.score.flipkyBalance - bet
-            }
+        setScore(prevScore => ({
+            ...prevScore,
+            flipkyBalance: prevScore.flipkyBalance - bet
         }));
         setLastCreatedGame(createdGame);
         setGames([...games, createdGame]);
