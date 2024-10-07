@@ -3,6 +3,7 @@ package com.easygames.coinfliptelegram.server.controller;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
 import com.easygames.coinfliptelegram.server.dto.GameDto;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
+import com.easygames.coinfliptelegram.server.model.GameResult;
 import com.easygames.coinfliptelegram.server.model.GameState;
 import com.easygames.coinfliptelegram.server.service.GameService;
 import com.easygames.coinfliptelegram.server.service.UserService;
@@ -38,7 +39,7 @@ public class GameController {
             GameDto game = gameService.getGame(gameId);
             if (game.getState().equals(GameState.WAITING_FOR_OPPONENT)){
                 GameDto updatedGame = gameService.joinGame(user, game);
-                bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername());
+                bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername(), game.getBet());
                 return ResponseEntity.ok(updatedGame);
             } else{
                 return null;
@@ -64,11 +65,11 @@ public class GameController {
     }
 
     @PutMapping("/{gameId}/flip")
-    public ResponseEntity<GameDto> flipCoin(@PathVariable String gameId) {
+    public ResponseEntity<GameResult> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
         GameDto updatedGame = gameService.flipCoin(game);
         bot.sendResultMessages(updatedGame);
-        return ResponseEntity.ok(updatedGame);
+        return ResponseEntity.ok(updatedGame.getResult());
     }
 
     @GetMapping()

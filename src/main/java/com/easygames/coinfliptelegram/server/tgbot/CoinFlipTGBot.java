@@ -314,8 +314,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         }
     }
 
-    public void joinGameMessage(Long telegramId, String username) throws TelegramApiException {
-        String text = String.format("You joined the game with %s.", username);
+    public void joinGameMessage(Long telegramId, String username, int bet) throws TelegramApiException {
+        String text = String.format("%s joined your game with bet %s", username, bet);
         sendMessage(telegramId, text);
     }
 
@@ -326,8 +326,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 
     public void sendResultMessages(GameDto game) {
         try {
-            String winText = "Congrats! You win!";
-            String lossText = "Sorry, but you loss.";
+            String winText = "Congrats! You win " + game.getBet() + "!";
+            String lossText = "Sorry, but you loss " + game.getBet() + ".";
             boolean isInitiatorWins = game.getResult().isInitiatorWins();
             String initiatorText = String.format("Game result vs %s:\nThe coin landed on %s.\n%s", game.getOpponentUsername(), game.getResult().coinResult(), isInitiatorWins ? winText : lossText);
             String opponentText = String.format("Game result vs %s:\nThe coin landed on %s.\n%s", game.getInitiatorUsername(), game.getResult().coinResult(), isInitiatorWins ? lossText : winText);
