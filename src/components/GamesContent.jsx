@@ -103,20 +103,22 @@ const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
             <div className="game-table">
                 <div className="table-header">
                     <div className="header-cell">Username</div>
-                    <div className="header-cell">Bet (flipky)</div>
+                    <div className="header-cell">Bet</div>
+                    <div className="header-cell">Choice</div>
                     <div className="header-cell">Created</div>
                 </div>
                 <div className="table-body">
                     {games.map((game) => (
                         <div key={game.id} className="table-row" onClick={() => handleGameClick(game.id)}>
                             <div className="table-cell" style={{
-                                padding: activeGameId === game.id ? "6px 10px" : "10px"
+                                padding: activeGameId === game.id ? "6px 10px" : "10px",
                             }}>
                                 {activeGameId === game.id
                                     ? actionButton(game)[0]
                                     : game.initiatorId === initUser.telegramId ? "Me" : game.initiatorUsername}
                             </div>
                             <div className="table-cell">{game.bet}</div>
+                            <div className="table-cell">{game.initiatorChoice}</div>
                             <div className="table-cell" style={{
                                 padding: activeGameId === game.id && game.initiatorId === initUser.telegramId ? "6px 10px" : "10px"
                             }}>
