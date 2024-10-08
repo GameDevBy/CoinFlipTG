@@ -3,13 +3,15 @@ import {Choice, choices, MIN_BET_VALUE} from "../constants";
 import {createGame} from "../api";
 import {createGameUrl, createShareUrl} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
+import ConfirmModal from "./ConfirmModal";
 
-const HomeContent = ({initUser,setScore, games, setGames}) => {
+const HomeContent = ({initUser, setScore, games, setGames}) => {
     const {tg} = useTelegram()
     const [isCreatingGame, setIsCreatingGame] = useState();
     const [lastCreatedGame, setLastCreatedGame] = useState();
     const [bet, setBet] = useState(MIN_BET_VALUE);
     const [choice, setChoice] = useState(Choice.heads);
+    const [isBotGame, setIsBotGame] = useState(false)
 
     const openCreateGameMenu = () => {
         setIsCreatingGame(!isCreatingGame);
@@ -50,16 +52,22 @@ const HomeContent = ({initUser,setScore, games, setGames}) => {
         }
     };
 
-    const handlePlayVsBot = (e) => {
-
+    const handlePlayVsBotMenu = (e) => {
+        setIsBotGame(true)
     };
 
     return (
         <div className="content active">
             <h2 style={{marginBottom: "40px"}}>Welcome to CoinFlip {initUser.username}!</h2>
-            <button disabled={true} className="button" onClick={handlePlayVsBot}>
+            <button className="button" onClick={handlePlayVsBotMenu}>
                 Play vs Bot
             </button>
+            {isBotGame &&
+                <ConfirmModal
+                    message={"This will be a game with Coin_Bot. Be careful, the bot can cheat... Functionality is coming soon"}
+                    onConfirm={() => setIsBotGame(false)}
+                    onCancel={() => setIsBotGame(false)}
+                />}
             <button className="button" onClick={openCreateGameMenu}>
                 Create New Game
             </button>
@@ -118,7 +126,7 @@ const HomeContent = ({initUser,setScore, games, setGames}) => {
                             style={{
                                 width: "150px",
                             }}
-                            disabled={!bet || !choice || bet> initUser.score.flipkyBalance}
+                            disabled={!bet || !choice || bet > initUser.score.flipkyBalance}
                             onClick={() => {
                                 if (bet && choice) {
                                     handleCreateGame();

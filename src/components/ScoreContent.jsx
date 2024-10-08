@@ -52,34 +52,42 @@ const ScoreContent = ({score}) => {
                     </button>
                     {showScore &&
                         <div onClick={(e) => e.stopPropagation()} ref={scoreDialogRef} className="score-dialog">
-                            <div style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                width: "100%",
-                            }}>
-                                <p>
-                                    Games: <span>{score.playedGames}</span>
-                                </p>
-                                <p>
-                                    Wins: <span>{score.wins}</span>
-                                </p>
-                                <p>
-                                    Losses: <span>{score.losses}</span>
-                                </p>
-                                <p>
-                                    Total win flipky: <span
-                                    style={{color: "green"}}>{score.totalWinFlipky}</span>
-                                </p>
-                                <p>
-                                    Total loss flipky: <span style={{color: "red"}}>{score.totalLossFlipky}</span>
-                                </p>
-                                <p>Wins rate:{" "}
-                                    <span style={{
-                                        color: winsPercent === 0 ? "inherit" :
-                                            winsPercent > 0 ? "green" : "red"
-                                    }}>{winsPercent.toFixed(2)}%</span>
-                                </p>
+                            <div style={{position: "relative"}}>
+                                <button
+                                    className="dialog-close-button"
+                                    onClick={() => setShowScore(false)}
+                                >
+                                    ×
+                                </button>
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                }}>
+                                    <p>
+                                        Games: <span>{score.playedGames}</span>
+                                    </p>
+                                    <p>
+                                        Wins: <span>{score.wins}</span>
+                                    </p>
+                                    <p>
+                                        Losses: <span>{score.losses}</span>
+                                    </p>
+                                    <p>
+                                        Total win flipky: <span
+                                        style={{color: "green"}}>{score.totalWinFlipky}</span>
+                                    </p>
+                                    <p>
+                                        Total loss flipky: <span style={{color: "red"}}>{score.totalLossFlipky}</span>
+                                    </p>
+                                    <p>Wins rate:{" "}
+                                        <span style={{
+                                            color: winsPercent === 0 ? "inherit" :
+                                                winsPercent > 0 ? "green" : "red"
+                                        }}>{winsPercent.toFixed(2)}%</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>}
                     <div>

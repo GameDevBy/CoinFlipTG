@@ -56,7 +56,7 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
                     <p>Coin shows: {game.result.coinResult}</p>
                     <p>You {game.result.isInitiatorWins ? "loss." : "win!"} </p>
                     <div style={{display: 'flex', justifyContent: 'center'}}>
-                        <button style={{width: "100px", textAlign: "center"}} className="delete-game-btn"
+                        <button style={{textAlign: "center"}} className="button"
                                 onClick={() => {
                                     setActiveGame(null)
                                 }}>
