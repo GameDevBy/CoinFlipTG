@@ -21,6 +21,7 @@ import java.util.List;
 @RequestMapping("/api/games")
 @AllArgsConstructor
 public class GameController {
+    public static final double PERCENT_OF_WIN = 0.5;
 
     private final GameService gameService;
     private final UserService userService;
@@ -37,11 +38,11 @@ public class GameController {
         try {
             UserDto user = userService.getUser(userId);
             GameDto game = gameService.getGame(gameId);
-            if (game.getState().equals(GameState.WAITING_FOR_OPPONENT)){
+            if (game.getState().equals(GameState.WAITING_FOR_OPPONENT)) {
                 GameDto updatedGame = gameService.joinGame(user, game);
                 bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername(), game.getBet());
                 return ResponseEntity.ok(updatedGame);
-            } else{
+            } else {
                 return null;
             }
         } catch (TelegramApiException e) {
@@ -67,7 +68,7 @@ public class GameController {
     @PutMapping("/{gameId}/flip")
     public ResponseEntity<GameResult> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
-        GameDto updatedGame = gameService.flipCoin(game);
+        GameDto updatedGame = gameService.flipCoin(game, PERCENT_OF_WIN);
         bot.sendResultMessages(updatedGame);
         return ResponseEntity.ok(updatedGame.getResult());
     }
@@ -82,6 +83,14 @@ public class GameController {
     public ResponseEntity<?> deleteGame(@PathVariable String gameId) {
         gameService.deleteGame(gameId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/bot/{userId}")
+    public ResponseEntity<GameResult> botGame(@PathVariable String userId, @RequestBody CreateGameRequest gameRequest) {
+        UserDto user = userService.getUser(userId);
+        UserDto coinBot = userService.getUser(bot.getBotId(), bot.getBotUsername());
+        GameDto game = gameService.gameVsBot(user, coinBot, gameRequest);
+        return ResponseEntity.ok(game.getResult());
     }
 //    // WebSocket endpoint to handle player joining
 //    @MessageMapping("/game.join")

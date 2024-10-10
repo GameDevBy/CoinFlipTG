@@ -13,6 +13,7 @@ import com.easygames.coinfliptelegram.server.model.GameState;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class GameService {
 
+    public static final double PERCENT_OF_WIN_VS_BOT = 0.3;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
@@ -122,12 +124,19 @@ public class GameService {
         return gameDto;
     }
 
-    public GameDto flipCoin(GameDto game) {
-        boolean isHeads = Math.random() < 0.5;
-        GameChoice result = isHeads ? GameChoice.HEADS : GameChoice.TAILS;
-        GameChoice choice = game.getInitiatorChoice();
-        boolean initiatorWins = (choice.equals(result));
+    public GameDto flipCoin(GameDto game, double percentOfWin) {
+        double randomNumber = Math.random();
+        GameChoice userChoice = game.getInitiatorChoice();
+        GameChoice result = randomNumber < percentOfWin
+                ? userChoice
+                : (userChoice.equals(GameChoice.HEADS)
+                ? GameChoice.TAILS : GameChoice.HEADS);
+        boolean initiatorWins = (userChoice.equals(result));
+        return storeGameResult(game, result, initiatorWins);
+    }
 
+    @NotNull
+    private GameDto storeGameResult(GameDto game, GameChoice result, boolean initiatorWins) {
         GameResult gameResult = new GameResult(result, initiatorWins);
         game.setResult(gameResult);
         game.setState(GameState.FINISHED);
@@ -139,7 +148,25 @@ public class GameService {
         return game;
     }
 
-    private void updateUserScore(Long telegramId, int updatedFlipky, boolean isWin, int  bet) {
+    public GameDto gameVsBot(UserDto user, UserDto coinBot, CreateGameRequest gameRequest) {
+        String gameCode = UUID.randomUUID().toString().substring(0, 8);
+        GameChoice userChoice = gameRequest.getInitiatorChoice();
+        Game createdGame = Game.builder()
+                .gameCode(gameCode)
+                .initiatorId(gameRequest.getInitiatorId())
+                .initiatorUsername(gameRequest.getInitiatorUsername())
+                .createdAt(LocalDateTime.now())
+                .bet(gameRequest.getBet())
+                .initiatorChoice(userChoice)
+                .opponentId(coinBot.getTelegramId())
+                .opponentUsername(coinBot.getUsername())
+                .state(GameState.FINISHED)
+                .build();
+
+        return flipCoin(modelMapper.map(createdGame, GameDto.class), PERCENT_OF_WIN_VS_BOT);
+    }
+
+    private void updateUserScore(Long telegramId, int updatedFlipky, boolean isWin, int bet) {
         userRepository.findByTelegramId(telegramId).ifPresent(user -> {
             Score score = user.getScore();
             score.setFlipkyBalance(score.getFlipkyBalance() + updatedFlipky);
@@ -154,4 +181,6 @@ public class GameService {
             userRepository.save(user);
         });
     }
+
+
 }

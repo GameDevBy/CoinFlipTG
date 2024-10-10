@@ -5,6 +5,7 @@ import com.easygames.coinfliptelegram.server.dto.UserDto;
 import com.easygames.coinfliptelegram.server.model.GameChoice;
 import com.easygames.coinfliptelegram.server.service.GameService;
 import com.easygames.coinfliptelegram.server.service.UserService;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
     private final GameService gameService;
     private final UserService userService;
     private final TelegramClient telegramClient;
+
     @Value("${BOT.TOKEN}")
     private String botToken;
     @Value("${BOT.NAME}")
@@ -47,6 +49,13 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
         this.telegramClient = telegramClient;
     }
 
+    public String getBotUsername() {
+        return botUsername;
+    }
+
+    public Long getBotId() {
+        return Long.parseLong(botToken.split(":")[0]);
+    }
 
     @Override
     public String getBotToken() {
