@@ -135,6 +135,8 @@ const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
                     message={`Are you sure you want to delete this game?`}
                     onConfirm={confirmDelete}
                     onCancel={cancelDelete}
+                    styleConfirmBtn={{background: "#ff4d4d"}}
+                    styleCancelBtn={{background: "#46b449"}}
                 />
             )}
         </div>

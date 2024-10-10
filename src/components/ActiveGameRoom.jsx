@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {cancelGame, flipCoin} from "../api";
 import {Choice} from "../constants";
+import CoinFlipAnimation from "./CoinFlipAnimation";
 
 const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames}) => {
     const [isFlipping, setIsFlipping] = useState(false);
@@ -69,13 +70,7 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
                     <p>Bet: {game.bet} flipky</p>
                     <p>Your choice: {game.initiatorChoice}</p>
                     {isFlipping || coinSide ? (
-                        <div className="coin-flip-animation">
-                            <img
-                                src={`${process.env.PUBLIC_URL}/images/${coinSide || 'heads'}.png`}
-                                alt="Flipping coin"
-                                className={isFlipping ? "flipping-coin" : "result-coin"}
-                            />
-                        </div>
+                        <CoinFlipAnimation coinSide={coinSide} isFlipping={isFlipping}/>
                     ) : (
                         <div style={{display: 'flex', justifyContent: 'center', gap: "15px"}}>
                             <button style={{padding: "10px", width: "100px", borderRadius: "15px"}}

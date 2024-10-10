@@ -230,6 +230,7 @@ body {
     opacity: 0.8;
 }
 
+.create-game-dialog,
 .active-game-dialog,
 .score-dialog {
     position: fixed;
