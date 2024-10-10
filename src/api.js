@@ -80,3 +80,16 @@ export const cancelGame = async (gameId) => {
         console.error("Error cancel game:", error);
     }
 };
+
+export const botGame = async (userId, requestData) => {
+    try {
+        const response = await fetch(`${host}/api/games/bot/${userId}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(requestData),
+        });
+        return await response.json()
+    } catch (error) {
+        console.error("Error creating game:", error);
+    }
+};

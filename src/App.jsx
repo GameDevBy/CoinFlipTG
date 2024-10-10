@@ -15,6 +15,7 @@ function App() {
     const [activeTab, setActiveTab] = useState(Tab.home);
     const [games, setGames] = useState([]);
     const [activeGame, setActiveGame] = useState(null);
+    const [lastCreatedGame, setLastCreatedGame] = useState();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -81,7 +82,7 @@ function App() {
                 </div>
             </div>
             {activeTab === Tab.home && (
-                <HomeContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}/>
+                <HomeContent initUser={initUser} score={score} setScore={setScore} games={games} setGames={setGames} lastCreatedGame={lastCreatedGame} setLastCreatedGame={setLastCreatedGame}/>
             )}
             {activeTab === Tab.games && (
                 <GamesContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}
