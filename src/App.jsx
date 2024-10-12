@@ -24,7 +24,7 @@ function App() {
         if (webAppUser && isReady) {
             const user = {
                 telegramId: webAppUser?.id,
-                username: webAppUser?.username,
+                username: webAppUser?.username ?? "",
             };
             if (user?.telegramId) {
                 fetchUserData(user, setInitUser, setScore);

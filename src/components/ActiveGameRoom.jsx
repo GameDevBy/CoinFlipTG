@@ -35,13 +35,14 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
 
             const updatedGames = games.filter(g => g.id !== game.id);
             const isWin = !result.isInitiatorWins;
+            const gameBet = Number(game.bet);
             const newScore = {
                 wins: isWin ? score.wins + 1 : score.wins,
                 losses: isWin ? score.losses : score.losses + 1,
                 playedGames: score.playedGames + 1,
-                flipkyBalance: isWin ? score.flipkyBalance + game.bet : score.flipkyBalance - game.bet,
-                totalWinFlipky: isWin ? score.totalWinFlipky + game.bet : score.totalWinFlipky,
-                totalLossFlipky: !isWin ? score.totalLossFlipky + game.bet : score.totalLossFlipky
+                flipkyBalance: isWin ? score.flipkyBalance + gameBet : score.flipkyBalance - gameBet,
+                totalWinFlipky: isWin ? score.totalWinFlipky + gameBet : score.totalWinFlipky,
+                totalLossFlipky: !isWin ? score.totalLossFlipky + gameBet : score.totalLossFlipky
             };
             setGames(updatedGames);
             setActiveGame({...game, result: result});

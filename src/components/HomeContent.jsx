@@ -24,13 +24,21 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
     };
 
     const handleBetChange = (e) => {
-        let valueString = e.target.value.toString().replace(/^0+/, '');
-        if (valueString === '') {
-            valueString = '0';
+        try {
+            if (isNaN(e.target.value) || e.target.value === undefined){
+                setBet(1);
+            } else {
+                let valueString = e.target.value.toString().replace(/^0+/, '');
+                if (valueString === '') {
+                    valueString = '0';
+                }
+                const maxValue = +score.flipkyBalance;
+                const numValue = Math.min(+valueString, maxValue);
+                setBet(+numValue);
+            }
+        } catch{
+            setBet(1);
         }
-        const maxValue = +score.flipkyBalance;
-        const numValue = Math.min(+valueString, maxValue);
-        setBet(numValue);
     };
 
     const handleChoiceChange = (choice) => {
@@ -41,13 +49,13 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
         const requestData = {
             initiatorId: initUser.telegramId,
             initiatorUsername: initUser.username,
-            bet: bet,
+            bet: Math.abs(Math.floor(bet)),
             initiatorChoice: choice.toLocaleUpperCase(),
         }
         const createdGame = await createGame(requestData)
         setScore(prevScore => ({
             ...prevScore,
-            flipkyBalance: prevScore.flipkyBalance - bet
+            flipkyBalance: prevScore.flipkyBalance - Number(bet)
         }));
         setLastCreatedGame(createdGame);
         setGames([...games, createdGame]);
@@ -77,7 +85,7 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
             const requestData = {
                 initiatorId: initUser.telegramId,
                 initiatorUsername: initUser.username,
-                bet: bet,
+                bet: Math.abs(Math.floor(bet)),
                 initiatorChoice: choice.toLocaleUpperCase(),
             }
             const result = await botGame(initUser.id, requestData);
@@ -100,9 +108,9 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
                 wins: isWin ? score.wins + 1 : score.wins,
                 losses: isWin ? score.losses : score.losses + 1,
                 playedGames: score.playedGames + 1,
-                flipkyBalance: isWin ? score.flipkyBalance + bet : score.flipkyBalance - bet,
-                totalWinFlipky: isWin ? score.totalWinFlipky + bet : score.totalWinFlipky,
-                totalLossFlipky: !isWin ? score.totalLossFlipky + bet : score.totalLossFlipky
+                flipkyBalance: isWin ? score.flipkyBalance + Number(bet) : score.flipkyBalance - Number(bet),
+                totalWinFlipky: isWin ? score.totalWinFlipky + Number(bet) : score.totalWinFlipky,
+                totalLossFlipky: !isWin ? score.totalLossFlipky + Number(bet) : score.totalLossFlipky
             };
             setScore(newScore);
             setBotGameResult(result)
