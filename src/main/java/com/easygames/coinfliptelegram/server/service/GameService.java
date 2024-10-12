@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,8 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    @Value("${BOT.NAME}")
+    private String botUsername;
 
     public List<GameDto> getGames() {
         return gameRepository.findAll().stream()
@@ -39,6 +42,29 @@ public class GameService {
                 .sorted((Comparator.comparing(Game::getCreatedAt)))
                 .map(game -> modelMapper.map(game, GameDto.class))
                 .toList();
+    }
+
+    public List<GameDto> getPlayedGames(Long userId) {
+        return gameRepository.findPlayedGames(userId, GameState.FINISHED)
+                .map(game -> {
+                    GameDto gameDto = modelMapper.map(game, GameDto.class);
+
+                    // Replace bot username with "CoinFlip_Bot"
+                    if (botUsername.equals(gameDto.getInitiatorUsername())) {
+                        gameDto.setInitiatorUsername("CoinFlip_Bot");
+                    }
+                    if (botUsername.equals(gameDto.getOpponentUsername())) {
+                        gameDto.setOpponentUsername("CoinFlip_Bot");
+                    }
+                    // If the user is the opponent, swap usernames
+                    if (userId.equals(game.getOpponentId())) {
+                        String tempUsername = gameDto.getInitiatorUsername();
+                        gameDto.setOpponentUsername(tempUsername);
+                    }
+                    return gameDto;
+                })
+                .sorted((Comparator.comparing(GameDto::getPlayedAt)))
+               .toList();
     }
 
     public GameDto createGame(CreateGameRequest createGameRequest) {
@@ -140,9 +166,10 @@ public class GameService {
         GameResult gameResult = new GameResult(result, initiatorWins);
         game.setResult(gameResult);
         game.setState(GameState.FINISHED);
+        game.setPlayedAt(LocalDateTime.now());
         gameRepository.save(modelMapper.map(game, Game.class));
 
-        int bet = game.getBet(); // You can make this dynamic based on user input
+        int bet = game.getBet();
         updateUserScore(game.getInitiatorId(), initiatorWins ? (bet * 2) : 0, initiatorWins, bet);
         updateUserScore(game.getOpponentId(), initiatorWins ? -bet : bet, !initiatorWins, bet);
         return game;

@@ -25,5 +25,6 @@ public class Game {
     private GameChoice initiatorChoice;
     private GameResult result;
     private LocalDateTime createdAt;
+    private LocalDateTime playedAt;
     private GameState state;
 }

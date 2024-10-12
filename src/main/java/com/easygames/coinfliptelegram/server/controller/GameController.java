@@ -79,6 +79,13 @@ public class GameController {
         return ResponseEntity.ok(games);
     }
 
+    @GetMapping("{userId}/history")
+    public ResponseEntity<List<GameDto>> getPlayedGames(@PathVariable String userId) {
+        UserDto user = userService.getUser(userId);
+        List<GameDto> games = gameService.getPlayedGames(user.getTelegramId());
+        return ResponseEntity.ok(games);
+    }
+
     @DeleteMapping("{gameId}")
     public ResponseEntity<?> deleteGame(@PathVariable String gameId) {
         gameService.deleteGame(gameId);
