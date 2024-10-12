@@ -7,6 +7,7 @@ import {useTelegram} from "./hooks/useTelegram";
 import {GameState, Tab, tabs} from "./constants";
 import ActiveGameRoom from "./components/ActiveGameRoom";
 import HomeContent from "./components/HomeContent";
+import HistoryContent from "./components/HistoryContent";
 
 function App() {
     const {webAppUser, tg, isReady} = useTelegram()
@@ -14,6 +15,7 @@ function App() {
     const [score, setScore] = useState();
     const [activeTab, setActiveTab] = useState(Tab.home);
     const [games, setGames] = useState([]);
+    const [history, setHistory] = useState([]);
     const [activeGame, setActiveGame] = useState(null);
     const [lastCreatedGame, setLastCreatedGame] = useState();
     const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +84,8 @@ function App() {
                 </div>
             </div>
             {activeTab === Tab.home && (
-                <HomeContent initUser={initUser} score={score} setScore={setScore} games={games} setGames={setGames} lastCreatedGame={lastCreatedGame} setLastCreatedGame={setLastCreatedGame}/>
+                <HomeContent initUser={initUser} score={score} setScore={setScore} games={games} setGames={setGames}
+                             lastCreatedGame={lastCreatedGame} setLastCreatedGame={setLastCreatedGame}/>
             )}
             {activeTab === Tab.games && (
                 <GamesContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}
@@ -93,9 +96,7 @@ function App() {
                     <h2>Coming soon...</h2>
                 </div>
             )} {activeTab === Tab.history && (
-            <div style={{textAlign: "center", marginTop: "140px"}}>
-                <h2>Coming soon...</h2>
-            </div>
+            <HistoryContent initUser={initUser} history={history} setHistory={setHistory}/>
         )} {activeTab === Tab.rating && (
             <div style={{textAlign: "center", marginTop: "140px"}}>
                 <h2>Coming soon...</h2>

@@ -1,4 +1,7 @@
 export const formatDate = (dateArray) => {
+    if (!dateArray){
+        return new Date().toLocaleDateString()
+    }
     // Destructure the array
     const [year, month, day] = dateArray;
 

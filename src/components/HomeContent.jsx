@@ -24,9 +24,13 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
     };
 
     const handleBetChange = (e) => {
-        if (typeof +e.target.value === "number") {
-            setBet(Number(e.target.value));
+        let valueString = e.target.value.toString().replace(/^0+/, '');
+        if (valueString === '') {
+            valueString = '0';
         }
+        const maxValue = +score.flipkyBalance;
+        const numValue = Math.min(+valueString, maxValue);
+        setBet(numValue);
     };
 
     const handleChoiceChange = (choice) => {
@@ -181,8 +185,7 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
                         handleChoiceChange={handleChoiceChange}
                         bet={bet}
                         handleBetChange={handleBetChange}
-                        handleCreateGame={handleCreateGame}
-                        setIsCreatingGame={setIsCreatingGame}
+                        setOpenModal={() => setIsCreatingGame(false)}
                         buttonAction={handleCreateGame}
                         buttonText={"Create"}
                     />

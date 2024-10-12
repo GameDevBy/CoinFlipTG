@@ -26,7 +26,7 @@ const CreateGameDialog = ({
             >
                 <button
                     className="dialog-close-button"
-                    onClick={() => setOpenModal(false)}
+                    onClick={setOpenModal}
                 >
                     ×
                 </button>
@@ -39,7 +39,7 @@ const CreateGameDialog = ({
                     }}
                     min={1}
                     max={+score.flipkyBalance}
-                    type="number"
+                    type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     placeholder="Enter your bet"

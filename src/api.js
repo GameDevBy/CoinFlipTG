@@ -24,6 +24,15 @@ export const fetchGames = async (setGames) => {
     }
 };
 
+export const fetchHistory = async (userId) => {
+    try {
+        const response = await fetch(`${host}/api/games/${userId}/history`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching games:", error);
+    }
+};
+
 export const createGame = async (requestData) => {
     try {
         const response = await fetch(`${host}/api/games`, {
