@@ -89,6 +89,8 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
                 String gameCode = messageText.substring("/start game_".length()).trim();
                 joinGame(chatId, gameCode, username);
             } else {
+                UserDto user = userService.getUser(chatId, username);
+
                 sendOpenAppMessage(chatId, "Welcome to Coin Flip!", "Play");
             }
         }

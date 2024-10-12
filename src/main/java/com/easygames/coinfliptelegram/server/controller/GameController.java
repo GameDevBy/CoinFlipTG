@@ -38,6 +38,9 @@ public class GameController {
         try {
             UserDto user = userService.getUser(userId);
             GameDto game = gameService.getGame(gameId);
+            if (user.getScore().getFlipkyBalance()< game.getBet()){
+                return null;
+            }
             if (game.getState().equals(GameState.WAITING_FOR_OPPONENT)) {
                 GameDto updatedGame = gameService.joinGame(user, game);
                 bot.joinGameMessage(game.getInitiatorId(), game.getOpponentUsername(), game.getBet());
@@ -68,7 +71,7 @@ public class GameController {
     @PutMapping("/{gameId}/flip")
     public ResponseEntity<GameResult> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
-        GameDto updatedGame = gameService.flipCoin(game, PERCENT_OF_WIN);
+        GameDto updatedGame = gameService.flipCoin(game, PERCENT_OF_WIN, false);
         bot.sendResultMessages(updatedGame);
         return ResponseEntity.ok(updatedGame.getResult());
     }
@@ -95,6 +98,9 @@ public class GameController {
     @PostMapping("/bot/{userId}")
     public ResponseEntity<GameResult> botGame(@PathVariable String userId, @RequestBody CreateGameRequest gameRequest) {
         UserDto user = userService.getUser(userId);
+        if (user.getScore().getFlipkyBalance() < gameRequest.getBet()) {
+            return null;
+        }
         UserDto coinBot = userService.getUser(bot.getBotId(), bot.getBotUsername());
         GameDto game = gameService.gameVsBot(user, coinBot, gameRequest);
         return ResponseEntity.ok(game.getResult());

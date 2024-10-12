@@ -64,7 +64,7 @@ public class GameService {
                     return gameDto;
                 })
                 .sorted((Comparator.comparing(GameDto::getPlayedAt)))
-               .toList();
+                .toList();
     }
 
     public GameDto createGame(CreateGameRequest createGameRequest) {
@@ -150,7 +150,7 @@ public class GameService {
         return gameDto;
     }
 
-    public GameDto flipCoin(GameDto game, double percentOfWin) {
+    public GameDto flipCoin(GameDto game, double percentOfWin, boolean isPlayVSBot) {
         double randomNumber = Math.random();
         GameChoice userChoice = game.getInitiatorChoice();
         GameChoice result = randomNumber < percentOfWin
@@ -158,11 +158,11 @@ public class GameService {
                 : (userChoice.equals(GameChoice.HEADS)
                 ? GameChoice.TAILS : GameChoice.HEADS);
         boolean initiatorWins = (userChoice.equals(result));
-        return storeGameResult(game, result, initiatorWins);
+        return storeGameResult(game, result, initiatorWins, isPlayVSBot);
     }
 
     @NotNull
-    private GameDto storeGameResult(GameDto game, GameChoice result, boolean initiatorWins) {
+    private GameDto storeGameResult(GameDto game, GameChoice result, boolean initiatorWins, boolean isGameVSBot) {
         GameResult gameResult = new GameResult(result, initiatorWins);
         game.setResult(gameResult);
         game.setState(GameState.FINISHED);
@@ -170,18 +170,23 @@ public class GameService {
         gameRepository.save(modelMapper.map(game, Game.class));
 
         int bet = game.getBet();
-        updateUserScore(game.getInitiatorId(), initiatorWins ? (bet * 2) : 0, initiatorWins, bet);
+        int scoreChange = initiatorWins
+                ? (isGameVSBot ? bet : bet * 2)
+                : (isGameVSBot ? -bet : 0);
+
+        updateUserScore(game.getInitiatorId(), scoreChange, initiatorWins, bet);
         updateUserScore(game.getOpponentId(), initiatorWins ? -bet : bet, !initiatorWins, bet);
         return game;
     }
 
     public GameDto gameVsBot(UserDto user, UserDto coinBot, CreateGameRequest gameRequest) {
+        boolean isPlayVSBot = true;
         String gameCode = UUID.randomUUID().toString().substring(0, 8);
         GameChoice userChoice = gameRequest.getInitiatorChoice();
         Game createdGame = Game.builder()
                 .gameCode(gameCode)
-                .initiatorId(gameRequest.getInitiatorId())
-                .initiatorUsername(gameRequest.getInitiatorUsername())
+                .initiatorId(user.getTelegramId())
+                .initiatorUsername(user.getUsername())
                 .createdAt(LocalDateTime.now())
                 .bet(gameRequest.getBet())
                 .initiatorChoice(userChoice)
@@ -190,7 +195,7 @@ public class GameService {
                 .state(GameState.FINISHED)
                 .build();
 
-        return flipCoin(modelMapper.map(createdGame, GameDto.class), PERCENT_OF_WIN_VS_BOT);
+        return flipCoin(modelMapper.map(createdGame, GameDto.class), PERCENT_OF_WIN_VS_BOT, isPlayVSBot);
     }
 
     private void updateUserScore(Long telegramId, int updatedFlipky, boolean isWin, int bet) {
