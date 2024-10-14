@@ -1,3 +1,5 @@
+import Rating from "./components/Rating";
+
 export const MIN_BET_VALUE = 1;
 
 export const Tab = {
@@ -5,7 +7,7 @@ export const Tab = {
     games: "Games",
     shop: "Shop",
     history: "History",
-    rating: "Rating"
+    rating: "Rate"
 }
 
 export const tabs = Object.values(Tab);

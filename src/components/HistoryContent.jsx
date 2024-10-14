@@ -5,10 +5,10 @@ import {Choice} from "../constants";
 
 const HistoryContent = ({initUser, history, setHistory}) => {
     useEffect(() => {
-        setUpHistory();
+        getHistory();
     }, []);
 
-    const setUpHistory = async () => {
+    const getHistory = async () => {
         const res = await fetchHistory(initUser.id);
         setHistory(res)
     }

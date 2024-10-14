@@ -4,10 +4,12 @@ import ScoreContent from "./components/ScoreContent";
 import {fetchGames, fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
-import {GameState, Tab, tabs} from "./constants";
+import {Choice, GameState, Tab, tabs} from "./constants";
 import ActiveGameRoom from "./components/ActiveGameRoom";
 import HomeContent from "./components/HomeContent";
 import HistoryContent from "./components/HistoryContent";
+import CoinFlipAnimation from "./components/CoinFlipAnimation";
+import Rating from "./components/Rating";
 
 function App() {
     const {webAppUser, tg, isReady} = useTelegram()
@@ -19,15 +21,20 @@ function App() {
     const [activeGame, setActiveGame] = useState(null);
     const [lastCreatedGame, setLastCreatedGame] = useState();
     const [isLoading, setIsLoading] = useState(true);
+    const [coinSide, setCoinSide] = useState(null);
 
     useEffect(() => {
+        const flipInterval = setInterval(() => {
+            setCoinSide(prev => prev === Choice.heads.toLowerCase() ? Choice.tails.toLowerCase() : Choice.heads.toLowerCase());
+        }, 300); // Change coin side every 150ms
+
         if (webAppUser && isReady) {
             const user = {
                 telegramId: webAppUser?.id,
-                username: webAppUser?.username ?? "",
+                username: webAppUser?.username ?? "!Hidden",
             };
             if (user?.telegramId) {
-                fetchUserData(user, setInitUser, setScore);
+                fetchUserData(user, setInitUser, setScore).finally(() => setIsLoading(false));
                 fetchGames(setGames);
             }
         }
@@ -62,12 +69,12 @@ function App() {
             <div className="content active">
                 <h2 style={{marginBottom: "20px"}}>Welcome to CoinFlip!</h2>
                 <h3>Loading...</h3>
+                {isLoading && <CoinFlipAnimation coinSide={coinSide} isFlipping={isLoading}/>}
             </div>
         )
     }
 
     return (
-        isLoading &&
         <div className="container">
             <div className="header">
                 {score && <ScoreContent score={score}/>}
@@ -98,9 +105,7 @@ function App() {
             )} {activeTab === Tab.history && (
             <HistoryContent initUser={initUser} history={history} setHistory={setHistory}/>
         )} {activeTab === Tab.rating && (
-            <div style={{textAlign: "center", marginTop: "140px"}}>
-                <h2>Coming soon...</h2>
-            </div>
+            <Rating/>
         )}
             {activeGame &&
                 <ActiveGameRoom
