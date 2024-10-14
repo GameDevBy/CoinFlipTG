@@ -90,7 +90,6 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
                 joinGame(chatId, gameCode, username);
             } else {
                 UserDto user = userService.getUser(chatId, username);
-
                 sendOpenAppMessage(chatId, "Welcome to Coin Flip!", "Play");
             }
         }
@@ -108,6 +107,7 @@ public class CoinFlipTGBot implements SpringLongPollingBot, LongPollingSingleThr
 //        }
         log.info("Message: {}", messageText);
         log.info("ChatId: {}", chatId);
+        log.info("Username: {}", username);
     }
 
     //    private void handleCallbackQuery(CallbackQuery callbackQuery) throws TelegramApiException {

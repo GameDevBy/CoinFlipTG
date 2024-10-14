@@ -4,7 +4,7 @@ import com.easygames.coinfliptelegram.server.dao.GameRepository;
 import com.easygames.coinfliptelegram.server.dao.UserRepository;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
 import com.easygames.coinfliptelegram.server.dto.GameDto;
-import com.easygames.coinfliptelegram.server.dto.Score;
+import com.easygames.coinfliptelegram.server.model.Score;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
 import com.easygames.coinfliptelegram.server.model.Game;
 import com.easygames.coinfliptelegram.server.model.GameChoice;

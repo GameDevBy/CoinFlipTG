@@ -1,5 +1,6 @@
 package com.easygames.coinfliptelegram.server.dto;
 
+import com.easygames.coinfliptelegram.server.model.Score;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

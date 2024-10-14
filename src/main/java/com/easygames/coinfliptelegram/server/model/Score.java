@@ -1,4 +1,4 @@
-package com.easygames.coinfliptelegram.server.dto;
+package com.easygames.coinfliptelegram.server.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

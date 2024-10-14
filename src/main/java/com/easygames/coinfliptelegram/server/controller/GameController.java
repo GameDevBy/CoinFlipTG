@@ -105,6 +105,7 @@ public class GameController {
         GameDto game = gameService.gameVsBot(user, coinBot, gameRequest);
         return ResponseEntity.ok(game.getResult());
     }
+
 //    // WebSocket endpoint to handle player joining
 //    @MessageMapping("/game.join")
 //    @SendTo("/topic/game/{gameId}")
