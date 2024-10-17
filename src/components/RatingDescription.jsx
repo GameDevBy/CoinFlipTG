@@ -20,8 +20,8 @@ const RatingDescription = () => {
                 </li>
                 <li><strong>Average Win Amount (40% of your rating):</strong><br/>
                     This is your total winnings in flipky divided by the number of wins. This value is normalized
-                    (capped at 1000 flipky per win) and then multiplied by 40. Winning larger amounts of flipky in each
-                    game will significantly improve your rating, up to the maximum rated win amount of 1000 flipky.
+                    (capped at 500 flipky per win) and then multiplied by 40. Winning larger amounts of flipky in each
+                    game will significantly improve your rating, up to the maximum rated win amount of 500 flipky.
                 </li>
                 <li><strong>Games Played (15% of your rating):</strong><br/>
                     This factor rewards active players. You earn points for each game you play, with bonus points
@@ -32,13 +32,15 @@ const RatingDescription = () => {
             <h3>To improve your rating:</h3>
             <ul>
                 <li>Focus on maintaining a high win rate, especially as you play more games.</li>
-                <li>Aim for higher winnings in flipky for each game (up to 1000 flipky per win for maximum benefit).
+                <li>Aim for higher winnings in flipky for each game (up to 500 flipky per win for maximum benefit).
                 </li>
                 <li>Play regularly: Every game counts, and you get extra bonuses for each 10 games played.</li>
             </ul>
-            <p><em>Keep in mind that while your win rate is still important, the amount of flipky you win in each game
-                now has a significant impact on your overall rating. Consistency in both winning and earning high
-                amounts of flipky will lead to the best rating.</em></p>
+            <p><em>Keep in mind that your win rate is the most significant factor in determining your rating. While the
+                amount of flipky you win in each game does contribute to your overall rating, its impact is less
+                pronounced than your win rate. Consistency in winning games is the primary path to improving your
+                rating, with higher flipky winnings providing a secondary boost. Regular play also contributes to your
+                rating, but to a lesser extent than your performance in games.</em></p>
 
         </div>
     );
