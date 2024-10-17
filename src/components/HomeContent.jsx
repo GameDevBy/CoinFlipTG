@@ -7,7 +7,7 @@ import ConfirmModal from "./ConfirmModal";
 import CreateGameDialog from "./CreateGameDialog";
 import CoinFlipAnimation from "./CoinFlipAnimation";
 
-const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGame, setLastCreatedGame}) => {
+const HomeContent = ({initUser, score, setScore, lastCreatedGame, setLastCreatedGame}) => {
     const {tg} = useTelegram()
     const [isCreatingGame, setIsCreatingGame] = useState();
     const [bet, setBet] = useState(MIN_BET_VALUE);
@@ -58,7 +58,6 @@ const HomeContent = ({initUser, score, setScore, games, setGames, lastCreatedGam
             flipkyBalance: prevScore.flipkyBalance - Number(bet)
         }));
         setLastCreatedGame(createdGame);
-        setGames([...games, createdGame]);
         setIsCreatingGame(false);
     }
 

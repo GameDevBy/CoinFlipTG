@@ -1,4 +1,5 @@
 const host = process.env.REACT_APP_SERVER_HOST //"http://localhost:8080"
+export const ssePoint = `${host}/api/sse/games`
 export const fetchUserData = async (user, setInitUser, setScore) => {
     try {
         const response = await fetch(`${host}/api/users`, {
@@ -14,11 +15,10 @@ export const fetchUserData = async (user, setInitUser, setScore) => {
     }
 };
 
-export const fetchGames = async (setGames) => {
+export const fetchGames = async () => {
     try {
         const response = await fetch(`${host}/api/games`);
-        const gamesData = await response.json();
-        setGames(gamesData);
+        return await response.json();
     } catch (error) {
         console.error("Error fetching games:", error);
     }

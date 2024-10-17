@@ -1,14 +1,47 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createGameUrl, createShareUrl, formatDate} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
-import {deleteGame, joinGame} from "../api";
+import {deleteGame, fetchGames, joinGame, ssePoint} from "../api";
 import ConfirmModal from "./ConfirmModal";
+import useSSE from "../useSSE";
+import {GameState} from "../constants";
 
 const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
     const {tg} = useTelegram()
     const [activeGameId, setActiveGameId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [gameToDelete, setGameToDelete] = useState(null);
+
+    const { data: sseData } = useSSE(ssePoint);
+
+    useEffect(() => {
+        if (initUser.id) {
+            getActiveGames();
+        }
+    }, [initUser]);
+
+    const handleSSEUpdate = (update) => {
+        switch (update.type) {
+            case 'NEW_GAME':
+                setGames(prevGames => [...prevGames, update.game]);
+                break;
+            case 'DELETE_GAME':
+                setGames(prevGames => prevGames.filter(game => game.id !== update.gameId));
+                break;
+            case 'UPDATE_GAME':
+                setGames(prevGames => prevGames.map(game =>
+                    game.id === update.game.id ? update.game : game
+                ));
+                break;
+            default:
+                console.warn('Unknown SSE update type:', update.type);
+        }
+    };
+
+    const getActiveGames = async () => {
+        const activeGames = await fetchGames();
+        setGames(activeGames)
+    }
 
     const handleGameClick = (gameId) => {
         setActiveGameId(activeGameId === gameId ? null : gameId);
@@ -61,7 +94,7 @@ const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
             const joinedGame = await joinGame(initUser.id, game.id);
             if (joinedGame) {
                 setActiveGame(joinedGame)
-            }else {
+            } else {
                 alert("This game is already finished or in progress. Please choose another game.");
             }
         } catch (err) {
@@ -109,23 +142,35 @@ const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
                 </div>
                 <div className="table-body">
                     {games.map((game) => (
-                        <div key={game.id} className="table-row" onClick={() => handleGameClick(game.id)}>
-                            <div className="table-cell" style={{
-                                padding: activeGameId === game.id ? "6px 10px" : "10px",
-                            }}>
-                                {activeGameId === game.id
-                                    ? actionButton(game)[0]
-                                    : game.initiatorId === initUser.telegramId ? "Me" : game.initiatorUsername}
-                            </div>
-                            <div className="table-cell">{game.bet}</div>
-                            <div className="table-cell">{game.initiatorChoice}</div>
-                            <div className="table-cell" style={{
-                                padding: activeGameId === game.id && game.initiatorId === initUser.telegramId ? "6px 10px" : "10px"
-                            }}>
-                                {activeGameId === game.id && game.initiatorId === initUser.telegramId
-                                    ? actionButton(game)[1]
-                                    : formatDate(game.createdAt)}
-                            </div>
+                        <div
+                            key={game.id}
+                            className={`table-row ${game.state === GameState.IN_PROGRESS ? 'in-progress' : ''}`}
+                            onClick={game.state !== GameState.IN_PROGRESS ? () => handleGameClick(game.id) : undefined}
+                        >
+                            {game.state === GameState.IN_PROGRESS ? (
+                                <div className="table-cell in-progress-message" colSpan="4">
+                                    <em><strong>In progress...</strong></em>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="table-cell" style={{
+                                        padding: activeGameId === game.id ? "6px 10px" : "10px",
+                                    }}>
+                                        {activeGameId === game.id
+                                            ? actionButton(game)[0]
+                                            : game.initiatorId === initUser.telegramId ? "Me" : game.initiatorUsername}
+                                    </div>
+                                    <div className="table-cell">{game.bet}</div>
+                                    <div className="table-cell">{game.initiatorChoice}</div>
+                                    <div className="table-cell" style={{
+                                        padding: activeGameId === game.id && game.initiatorId === initUser.telegramId ? "6px 10px" : "10px"
+                                    }}>
+                                        {activeGameId === game.id && game.initiatorId === initUser.telegramId
+                                            ? actionButton(game)[1]
+                                            : formatDate(game.createdAt)}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>

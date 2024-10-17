@@ -154,6 +154,19 @@ body {
     align-items: center;
 }
 
+.table-row.in-progress {
+    grid-template-columns: 1fr;
+    cursor: default;
+}
+
+.table-cell.in-progress-message {
+    text-align: center;
+    padding: 10px;
+    font-style: italic;
+    font-weight: bold;
+    color: #46b449;
+}
+
 .table-header-history, .table-row-history {
     display: grid;
     grid-template-columns: 1fr 0.4fr 0.5fr 0.6fr 0.5fr;

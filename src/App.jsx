@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import "./App.css";
 import ScoreContent from "./components/ScoreContent";
-import {fetchGames, fetchUserData} from "./api";
+import {fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
 import {Choice, GameState, Tab, tabs} from "./constants";
@@ -44,7 +44,6 @@ function App() {
             };
             if (user?.telegramId) {
                 fetchUserData(user, setInitUser, setScore).finally(() => setIsLoading(false));
-                fetchGames(setGames);
             }
         }
         return () => {
@@ -103,12 +102,22 @@ function App() {
                 </div>
             </div>
             {activeTab === Tab.home && (
-                <HomeContent initUser={initUser} score={score} setScore={setScore} games={games} setGames={setGames}
-                             lastCreatedGame={lastCreatedGame} setLastCreatedGame={setLastCreatedGame}/>
+                <HomeContent
+                    initUser={initUser}
+                    score={score}
+                    setScore={setScore}
+                    lastCreatedGame={lastCreatedGame}
+                    setLastCreatedGame={setLastCreatedGame}
+                />
             )}
             {activeTab === Tab.games && (
-                <GamesContent initUser={initUser} setScore={setScore} games={games} setGames={setGames}
-                              setActiveGame={setActiveGame}/>
+                <GamesContent
+                    initUser={initUser}
+                    setScore={setScore}
+                    games={games}
+                    setGames={setGames}
+                    setActiveGame={setActiveGame}
+                />
             )}
             {activeTab === Tab.shop && (
                 <div style={{textAlign: "center", marginTop: "140px"}}>
@@ -125,8 +134,6 @@ function App() {
                     setScore={setScore}
                     game={activeGame}
                     setActiveGame={setActiveGame}
-                    games={games}
-                    setGames={setGames}
                 />}
         </div>
     );

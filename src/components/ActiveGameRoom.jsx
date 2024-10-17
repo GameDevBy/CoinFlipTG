@@ -3,7 +3,7 @@ import {cancelGame, flipCoin} from "../api";
 import {Choice} from "../constants";
 import CoinFlipAnimation from "./CoinFlipAnimation";
 
-const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames}) => {
+const ActiveGameRoom = ({score, setScore, game, setActiveGame}) => {
     const [isFlipping, setIsFlipping] = useState(false);
     const [coinSide, setCoinSide] = useState(null);
     const [showResult, setShowResult] = useState(false);
@@ -33,7 +33,6 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
 
             setShowResult(true);
 
-            const updatedGames = games.filter(g => g.id !== game.id);
             const isWin = !result.isInitiatorWins;
             const gameBet = Number(game.bet);
             const newScore = {
@@ -44,7 +43,6 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
                 totalWinFlipky: isWin ? score.totalWinFlipky + gameBet : score.totalWinFlipky,
                 totalLossFlipky: !isWin ? score.totalLossFlipky + gameBet : score.totalLossFlipky
             };
-            setGames(updatedGames);
             setActiveGame({...game, result: result});
             setScore(newScore);
         } catch (error) {
@@ -57,7 +55,6 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame, games, setGames})
     const handleCancelGame = async () => {
         try {
             const result = await cancelGame(game.id)
-            const updatedGames = games.map(g => g.id === game.id ? result : g)
             setActiveGame(null)
         } catch (error) {
             console.error("Error flipping coin:", error);
