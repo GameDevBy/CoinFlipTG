@@ -24,10 +24,19 @@ function App() {
     const [coinSide, setCoinSide] = useState(null);
 
     useEffect(() => {
-        const flipInterval = setInterval(() => {
-            setCoinSide(prev => prev === Choice.heads.toLowerCase() ? Choice.tails.toLowerCase() : Choice.heads.toLowerCase());
-        }, 300); // Change coin side every 150ms
+        let animationFrameId;
+        let lastFlipTime = 0;
+        const flipInterval = 100; // Flip every 100ms
 
+        const animate = (currentTime) => {
+            if (currentTime - lastFlipTime > flipInterval) {
+                setCoinSide(prev => prev === Choice.heads.toLowerCase() ? Choice.tails.toLowerCase() : Choice.heads.toLowerCase());
+                lastFlipTime = currentTime;
+            }
+            animationFrameId = requestAnimationFrame(animate);
+        };
+
+        animationFrameId = requestAnimationFrame(animate);
         if (webAppUser && isReady) {
             const user = {
                 telegramId: webAppUser?.id,
@@ -38,6 +47,9 @@ function App() {
                 fetchGames(setGames);
             }
         }
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
     }, [webAppUser, isReady]);
 
     useEffect(() => {

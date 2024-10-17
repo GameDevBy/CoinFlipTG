@@ -41,21 +41,19 @@ const Rating = () => {
             </div>
             {showDescription &&
                 <div className="rating-description-dialog">
-                    <div style={{
-                        height: "90vh",
-                        overflowX: "hidden",
-                        overflowY: "auto"
-                    }}>
-                        <div style={{position: "relative", padding: "20px",}}>
-                            <button
-                                className="dialog-close-button"
-                                style={{top: "10px", right: "10px"}}
-                                onClick={() => setShowDescription(false)}
-                            >
-                                ×
-                            </button>
-                            <RatingDescription/>
-                        </div>
+                    <button
+                        className="dialog-close-button"
+                        onClick={() => setShowDescription(false)}
+                        style={{
+                            top: "5px",
+                            right: "10px",
+                            float: "right"
+                        }}
+                    >
+                        ×
+                    </button>
+                    <div className="description-content">
+                        <RatingDescription/>
                     </div>
                 </div>}
         </div>
