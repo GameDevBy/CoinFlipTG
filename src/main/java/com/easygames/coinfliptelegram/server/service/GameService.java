@@ -1,5 +1,6 @@
 package com.easygames.coinfliptelegram.server.service;
 
+import com.easygames.coinfliptelegram.server.controller.GameSSEController;
 import com.easygames.coinfliptelegram.server.dao.GameRepository;
 import com.easygames.coinfliptelegram.server.dao.UserRepository;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
@@ -33,6 +34,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private GameSSEController gameSSEController;
     @Value("${BOT.NAME}")
     private String botUsername;
 
@@ -93,6 +95,7 @@ public class GameService {
                 userRepository.save(user);
             });
             Game saved = gameRepository.save(createdGame);
+            gameSSEController.sendGameUpdate("NEW_GAME", createdGame);
             return modelMapper.map(saved, GameDto.class);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -104,7 +107,9 @@ public class GameService {
         gameDto.setOpponentId(userDto.getTelegramId());
         gameDto.setOpponentUsername(userDto.getUsername());
         gameDto.setState(GameState.IN_PROGRESS);
-        gameRepository.save(modelMapper.map(gameDto, Game.class));
+        Game game = gameRepository.save(modelMapper.map(gameDto, Game.class));
+        gameSSEController.sendGameUpdate("UPDATE_GAME", game);
+
         return gameDto;
     }
 
@@ -140,6 +145,7 @@ public class GameService {
                 }
         );
         gameRepository.deleteById(gameId);
+        gameSSEController.sendGameDelete(gameId);
     }
 
     public GameDto cancelGame(GameDto gameDto) {
