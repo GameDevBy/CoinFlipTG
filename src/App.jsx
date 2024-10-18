@@ -37,9 +37,9 @@ function App() {
         };
 
         animationFrameId = requestAnimationFrame(animate);
-        if (webAppUser && isReady) {
+        if (!webAppUser && !isReady) {
             const user = {
-                telegramId: webAppUser?.id,
+                telegramId: webAppUser?.id ?? 321082727,
                 username: webAppUser?.username ?? "!Hidden",
             };
             if (user?.telegramId) {

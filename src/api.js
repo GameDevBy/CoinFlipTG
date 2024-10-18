@@ -1,5 +1,5 @@
-const host = process.env.REACT_APP_SERVER_HOST //"http://localhost:8080"
-export const ssePoint = `${host}/api/sse/games`
+const host = "http://localhost:8080"// process.env.REACT_APP_SERVER_HOST //"http://localhost:8080"
+export const socketHost = "ws://localhost:8080/ws"// process.env.REACT_APP_SERVER_HOST //"ws://localhost:8080/ws"
 export const fetchUserData = async (user, setInitUser, setScore) => {
     try {
         const response = await fetch(`${host}/api/users`, {

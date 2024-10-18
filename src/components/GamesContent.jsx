@@ -1,42 +1,73 @@
 import React, {useEffect, useState} from 'react';
 import {createGameUrl, createShareUrl, formatDate} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
-import {deleteGame, fetchGames, joinGame, ssePoint} from "../api";
+import {deleteGame, fetchGames, joinGame, socketHost} from "../api";
 import ConfirmModal from "./ConfirmModal";
-import useSSE from "../useSSE";
 import {GameState} from "../constants";
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 const GamesContent = ({games, initUser, setScore, setGames, setActiveGame}) => {
     const {tg} = useTelegram()
     const [activeGameId, setActiveGameId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [gameToDelete, setGameToDelete] = useState(null);
+    const [stompClient, setStompClient] = useState(null);
 
-    const { data: sseData } = useSSE(ssePoint);
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws', null, {
+            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            heartbeatTimeout: 120000000
+        });
+        const client = Stomp.over(socket);
+
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        };
+        // 'Authorization': `Bearer ${access_token}`
+
+        client.connect(headers, (frame) => {
+            console.log('Connected: ' + frame);
+            setStompClient(client);
+
+            client.subscribe('/topic/games', (message) => {
+                const gameData = JSON.parse(message.body);
+                // Handle game updates
+                setGames(prevGames => {
+                    const index = prevGames.findIndex(game => game.id === gameData.id);
+                    if (index !== -1) {
+                        // Update existing game
+                        const newGames = [...prevGames];
+                        newGames[index] = gameData;
+                        return newGames;
+                    } else {
+                        // Add new game
+                        return [...prevGames, gameData];
+                    }
+                });
+            });
+
+            client.subscribe('/topic/games/delete', (message) => {
+                const gameId = message.body;
+                // Handle game deletion
+                setGames(prevGames => prevGames.filter(game => game.id !== gameId));
+            });
+        });
+
+        return () => {
+            if (stompClient) {
+                stompClient.disconnect();
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (initUser.id) {
             getActiveGames();
         }
     }, [initUser]);
-
-    const handleSSEUpdate = (update) => {
-        switch (update.type) {
-            case 'NEW_GAME':
-                setGames(prevGames => [...prevGames, update.game]);
-                break;
-            case 'DELETE_GAME':
-                setGames(prevGames => prevGames.filter(game => game.id !== update.gameId));
-                break;
-            case 'UPDATE_GAME':
-                setGames(prevGames => prevGames.map(game =>
-                    game.id === update.game.id ? update.game : game
-                ));
-                break;
-            default:
-                console.warn('Unknown SSE update type:', update.type);
-        }
-    };
 
     const getActiveGames = async () => {
         const activeGames = await fetchGames();
