@@ -54,7 +54,7 @@ public class GameController {
         }
     }
 
-    @PutMapping("/{gameId}/cancel")
+    @PutMapping("{gameId}/cancel")
     public ResponseEntity<GameDto> cancelGame(@PathVariable String gameId) {
         try {
             GameDto game = gameService.getGame(gameId);
@@ -68,7 +68,7 @@ public class GameController {
         }
     }
 
-    @PutMapping("/{gameId}/flip")
+    @PutMapping("{gameId}/flip")
     public ResponseEntity<GameResult> flipCoin(@PathVariable String gameId) {
         GameDto game = gameService.getGame(gameId);
         GameDto updatedGame = gameService.flipCoin(game, PERCENT_OF_WIN, false);
@@ -95,7 +95,7 @@ public class GameController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/bot/{userId}")
+    @PostMapping("bot/{userId}")
     public ResponseEntity<GameResult> botGame(@PathVariable String userId, @RequestBody CreateGameRequest gameRequest) {
         UserDto user = userService.getUser(userId);
         if (user.getScore().getFlipkyBalance() < gameRequest.getBet()) {
