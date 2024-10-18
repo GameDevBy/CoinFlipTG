@@ -10,6 +10,12 @@ export const Tab = {
     rating: "Rate"
 }
 
+export const GameAction = {
+    new: "NEW_GAME",
+    delete: "DELETE_GAME",
+    update: "UPDATE_GAME",
+}
+
 export const tabs = Object.values(Tab);
 export const Choice={
     heads: "Heads",

@@ -117,6 +117,7 @@ function App() {
                     games={games}
                     setGames={setGames}
                     setActiveGame={setActiveGame}
+                    setLastCreatedGame={setLastCreatedGame}
                 />
             )}
             {activeTab === Tab.shop && (
