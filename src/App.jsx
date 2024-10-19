@@ -4,15 +4,17 @@ import ScoreContent from "./components/ScoreContent";
 import {fetchUserData} from "./api";
 import GamesContent from "./components/GamesContent";
 import {useTelegram} from "./hooks/useTelegram";
-import {Choice, GameState, Tab, tabs} from "./constants";
+import {Choice, GameAction, GameState, Tab, tabs} from "./constants";
 import ActiveGameRoom from "./components/ActiveGameRoom";
 import HomeContent from "./components/HomeContent";
 import HistoryContent from "./components/HistoryContent";
 import CoinFlipAnimation from "./components/CoinFlipAnimation";
 import Rating from "./components/Rating";
+import useSSE from "./hooks/useSSE";
 
 function App() {
     const {webAppUser, tg, isReady} = useTelegram()
+    const {setUserId, scoreData, gameData, closeEventSource} = useSSE();
     const [initUser, setInitUser] = useState();
     const [score, setScore] = useState();
     const [activeTab, setActiveTab] = useState(Tab.home);
@@ -46,10 +48,42 @@ function App() {
                 fetchUserData(user, setInitUser, setScore).finally(() => setIsLoading(false));
             }
         }
+
         return () => {
             cancelAnimationFrame(animationFrameId);
         };
     }, [webAppUser, isReady]);
+
+    useEffect(() => {
+        if (scoreData) {
+            handleSSEUpdate(scoreData)
+        }
+    }, [scoreData]);
+
+    useEffect(() => {
+        const handleWebAppClose = () => closeEventSource(initUser?.id);
+        if (tg) {
+            tg.onEvent('web_app_close', handleWebAppClose);
+        }
+        return () => {
+            if (tg) {
+                tg.offEvent('web_app_close', handleWebAppClose);
+            }
+            closeEventSource(initUser?.id);
+        };
+    }, [tg, initUser?.id]);
+
+    useEffect(() => {
+        if ((!tg || !webAppUser) && initUser?.id) {
+            closeEventSource(initUser?.id);
+        }
+    }, [tg, webAppUser, initUser]);
+
+    useEffect(() => {
+        if (initUser?.id) {
+            setUserId(initUser.id);
+        }
+    }, [initUser]);
 
     useEffect(() => {
         if (games.length > 0 && initUser) {
@@ -60,18 +94,9 @@ function App() {
         }
     }, [games, initUser]);
 
-
-    const joinGame = async () => {
-        try {
-            const response = await fetch("/api/games/available");
-            const availableGames = await response.json();
-            if (availableGames.length > 0) {
-                await fetch(`/api/games/${availableGames[0].id}/join`, {
-                    method: "POST",
-                });
-            }
-        } catch (error) {
-            console.error("Error joining game:", error);
+    const handleSSEUpdate = (update) => {
+        if (update.action === GameAction.updateScore) {
+            setScore(update.score);
         }
     };
 
@@ -118,6 +143,7 @@ function App() {
                     setGames={setGames}
                     setActiveGame={setActiveGame}
                     setLastCreatedGame={setLastCreatedGame}
+                    gameData={gameData}
                 />
             )}
             {activeTab === Tab.shop && (

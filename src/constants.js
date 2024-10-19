@@ -11,9 +11,16 @@ export const Tab = {
 }
 
 export const GameAction = {
-    new: "NEW_GAME",
-    delete: "DELETE_GAME",
-    update: "UPDATE_GAME",
+    newGame: "GAME_NEW",
+    deleteGame: "GAME_DELETE",
+    updateGame: "GAME_UPDATE",
+    updateScore: "SCORE_UPDATE",
+}
+
+export const SseType = {
+    game: "GAME",
+    score: "SCORE",
+    heartbeat: "ping"
 }
 
 export const tabs = Object.values(Tab);
@@ -25,8 +32,6 @@ export const choices = Object.values(Choice);
 
 export const GameState = {
     WAITING_FOR_OPPONENT: "WAITING_FOR_OPPONENT",
-    WAITING_FOR_BET: "WAITING_FOR_BET",
-    ENTERING_CUSTOM_BET: "ENTERING_CUSTOM_BET",
     IN_PROGRESS: "IN_PROGRESS",
     FINISHED: "FINISHED",
 }

@@ -1,9 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {createGameUrl, createShareUrl, formatDate} from "../utils";
 import {useTelegram} from "../hooks/useTelegram";
-import {deleteGame, fetchGames, joinGame, ssePoint} from "../api";
+import {deleteGame, fetchGames, joinGame} from "../api";
 import ConfirmModal from "./ConfirmModal";
-import useSSE from "../useSSE";
 import {GameAction, GameState} from "../constants";
 
 const GamesContent = ({
@@ -12,64 +11,55 @@ const GamesContent = ({
                           setScore,
                           setGames,
                           setActiveGame,
-                          setLastCreatedGame
+                          setLastCreatedGame,
+                          gameData
                       }) => {
-    const {tg} = useTelegram()
+    const {tg} = useTelegram();
+
     const [activeGameId, setActiveGameId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [gameToDelete, setGameToDelete] = useState(null);
-
-    const {data: sseData, eventSource} = useSSE(ssePoint + `/${initUser.id}`);
 
     useEffect(() => {
         if (initUser.id) {
             getActiveGames();
         }
-        // Cleanup function to close EventSource when component unmounts
-        return () => {
-            if (eventSource) {
-                eventSource.close();
-                // Send request to server to remove emitter
-                fetch(`${ssePoint}/close/${initUser.id}`, {method: 'POST'})
-                    .then(response => {
-                        if (!response.ok) {
-                            console.error('Failed to close SSE connection on server');
-                        }
-                    })
-                    .catch(error => console.error('Error closing SSE connection:', error));
-            }
-        };
-    }, [initUser, eventSource]);
+    }, [initUser]);
 
     useEffect(() => {
-        if (sseData) {
-            handleSSEUpdate(sseData)
+        if (gameData) {
+            handleSSEUpdate(gameData)
         }
-    }, [sseData]);
-
-    const handleSSEUpdate = (update) => {
-        switch (update.type) {
-            case GameAction.new:
-                setGames(prevGames => [...prevGames, update.game]);
-                break;
-            case GameAction.delete:
-                setGames(prevGames => prevGames.filter(game => game.id !== update.gameId));
-                setLastCreatedGame(prev => prev.id === update.gameId ? null : prev)
-                break;
-            case GameAction.update:
-                setGames(prevGames => prevGames.map(game =>
-                    game.id === update.game.id ? update.game : game
-                ));
-                break;
-            default:
-                console.warn('Unknown SSE update type:', update.type);
-        }
-    };
+    }, [gameData]);
 
     const getActiveGames = async () => {
         const activeGames = await fetchGames();
         setGames(activeGames)
     }
+
+    const handleSSEUpdate = (update) => {
+        switch (update.action) {
+            case GameAction.newGame:
+                setGames(prevGames => [...prevGames.filter(game => game.id !== update.game.id), update.game]);
+                break;
+            case GameAction.deleteGame:
+                setGames(prevGames => prevGames.filter(game => game.id !== update.gameId));
+                setLastCreatedGame(prev => prev?.id === update.gameId ? null : prev)
+                break;
+            case GameAction.updateGame:
+                if (update.game.state === GameState.FINISHED){
+                    setGames(prevGames => prevGames.filter(game => game.id !== update.game.id));
+                    setLastCreatedGame(prev => prev?.id === update.game.id ? null : prev)
+                } else {
+                    setGames(prevGames => prevGames.map(game =>
+                        game.id === update.game.id ? update.game : game
+                    ));
+                }
+                break;
+            default:
+                console.warn('Unknown SSE update type:', update.type);
+        }
+    };
 
     const handleGameClick = (gameId) => {
         setActiveGameId(activeGameId === gameId ? null : gameId);
