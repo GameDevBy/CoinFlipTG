@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -26,6 +29,14 @@ public class SseEmitters {
     @PreDestroy
     public void shutdown() {
         scheduler.shutdown();
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("Error completing emitter for user {} during shutdown", userId, e);
+            }
+        });
+        emitters.clear();
     }
 
     private void sendHeartbeat() {
@@ -34,6 +45,18 @@ public class SseEmitters {
                 .name("heartbeat")
                 .data("ping")
                 .build());
+    }
+
+    public SseEmitter create(String userId) {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        emitter.onCompletion(() -> remove(userId));
+        emitter.onTimeout(() -> remove(userId));
+        emitter.onError((e) -> {
+            log.error("SSE error for user {}", userId, e);
+            remove(userId);
+        });
+        emitters.put(userId, emitter);
+        return emitter;
     }
 
     public void add(String userId, SseEmitter emitter) {
@@ -61,7 +84,11 @@ public class SseEmitters {
             try {
                 emitter.send(data);
             } catch (IOException e) {
-                log.error("Error sending SSE data to user {}: ", userId, e);
+                if (e.getMessage().contains("Broken pipe")) {
+                    log.info("Client disconnected for user {}: {}", userId, e.getMessage());
+                } else {
+                    log.error("Error sending SSE data to user {}: ", userId, e);
+                }
                 deadEmitterIds.add(userId);
             } catch (Exception e) {
                 log.error("Unexpected error while sending SSE data to user {}: ", userId, e);
@@ -84,5 +111,22 @@ public class SseEmitters {
 
     public int getActiveEmittersCount() {
         return emitters.size();
+    }
+
+    public void sendToUser(String userId, Object data) {
+        SseEmitter emitter = emitters.get(userId);
+        if (emitter != null) {
+            try {
+                emitter.send(data);
+            } catch (IOException e) {
+                log.error("Error sending SSE data to user {}: ", userId, e);
+                remove(userId);
+            } catch (Exception e) {
+                log.error("Unexpected error while sending SSE data to user {}: ", userId, e);
+                remove(userId);
+            }
+        } else {
+            log.warn("Attempted to send data to non-existent emitter for user: {}", userId);
+        }
     }
 }

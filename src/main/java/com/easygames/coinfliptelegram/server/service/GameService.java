@@ -5,12 +5,8 @@ import com.easygames.coinfliptelegram.server.dao.GameRepository;
 import com.easygames.coinfliptelegram.server.dao.UserRepository;
 import com.easygames.coinfliptelegram.server.dto.CreateGameRequest;
 import com.easygames.coinfliptelegram.server.dto.GameDto;
-import com.easygames.coinfliptelegram.server.model.Score;
+import com.easygames.coinfliptelegram.server.model.*;
 import com.easygames.coinfliptelegram.server.dto.UserDto;
-import com.easygames.coinfliptelegram.server.model.Game;
-import com.easygames.coinfliptelegram.server.model.GameChoice;
-import com.easygames.coinfliptelegram.server.model.GameResult;
-import com.easygames.coinfliptelegram.server.model.GameState;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -95,7 +91,7 @@ public class GameService {
                 userRepository.save(user);
             });
             Game saved = gameRepository.save(createdGame);
-            gameSSEController.sendGameUpdate("NEW_GAME", createdGame);
+            gameSSEController.sendGameUpdate(SseAction.GAME_NEW, createdGame);
             return modelMapper.map(saved, GameDto.class);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -108,7 +104,7 @@ public class GameService {
         gameDto.setOpponentUsername(userDto.getUsername());
         gameDto.setState(GameState.IN_PROGRESS);
         Game game = gameRepository.save(modelMapper.map(gameDto, Game.class));
-        gameSSEController.sendGameUpdate("UPDATE_GAME", game);
+        gameSSEController.sendGameUpdate(SseAction.GAME_UPDATE, game);
 
         return gameDto;
     }
@@ -173,8 +169,8 @@ public class GameService {
         game.setResult(gameResult);
         game.setState(GameState.FINISHED);
         game.setPlayedAt(LocalDateTime.now());
-        gameRepository.save(modelMapper.map(game, Game.class));
-
+        Game savedGame = gameRepository.save(modelMapper.map(game, Game.class));
+        gameSSEController.sendGameUpdate(SseAction.GAME_UPDATE, savedGame);
         int bet = game.getBet();
         int scoreChange = initiatorWins
                 ? (isGameVSBot ? bet : bet * 2)
@@ -216,6 +212,7 @@ public class GameService {
                 score.setLosses(score.getLosses() + 1);
                 score.setTotalLossFlipky(score.getTotalLossFlipky() + bet);
             }
+            gameSSEController.sendScoreUpdate(SseAction.SCORE_UPDATE, score, user.getId());
             userRepository.save(user);
         });
     }
