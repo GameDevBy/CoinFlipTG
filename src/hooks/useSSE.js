@@ -3,8 +3,8 @@ import {ssePoint} from "../api";
 import {SseType} from "../constants";
 
 const useSSE = () => {
-    const [gameData, setGameData] = useState(null);
-    const [scoreData, setScoreData] = useState(null);
+    const [gameDataSSE, setGameData] = useState(null);
+    const [scoreDataSSE, setScoreData] = useState(null);
     const [error, setError] = useState(null);
     const [userId, setUserId] = useState(null);
     const [es, setEs] = useState(null);
@@ -76,7 +76,7 @@ const useSSE = () => {
         }
     }, [userId]);
 
-    return {gameData, scoreData, setUserId, error, closeEventSource};
+    return {gameDataSSE, scoreDataSSE, setUserId, error, closeEventSource};
 };
 
 export default useSSE;

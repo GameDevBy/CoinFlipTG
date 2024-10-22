@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {cancelGame, flipCoin} from "../api";
 import {Choice} from "../constants";
 import CoinFlipAnimation from "./CoinFlipAnimation";
@@ -7,6 +7,16 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame}) => {
     const [isFlipping, setIsFlipping] = useState(false);
     const [coinSide, setCoinSide] = useState(null);
     const [showResult, setShowResult] = useState(false);
+    const [userChoice, setUserChoice] = useState(null);
+
+    useEffect(() => {
+        if (game) {
+            game.initiatorChoice.toLowerCase() === Choice.tails.toLowerCase()
+                ? setUserChoice(Choice.heads)
+                : setUserChoice(Choice.tails)
+
+        }
+    }, [game]);
 
     const handleFlipCoin = async () => {
         setIsFlipping(true);
@@ -66,7 +76,7 @@ const ActiveGameRoom = ({score, setScore, game, setActiveGame}) => {
                 <div>
                     <h2>Game with {game.initiatorUsername}</h2>
                     <p>Bet: {game.bet} flipky</p>
-                    <p>Your choice: {game.initiatorChoice}</p>
+                    <p>Your choice: {userChoice}</p>
                     {isFlipping || coinSide ? (
                         <CoinFlipAnimation coinSide={coinSide} isFlipping={isFlipping}/>
                     ) : (

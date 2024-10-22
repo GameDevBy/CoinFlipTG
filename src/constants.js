@@ -1,5 +1,3 @@
-import Rating from "./components/Rating";
-
 export const MIN_BET_VALUE = 1;
 
 export const Tab = {
@@ -25,8 +23,8 @@ export const SseType = {
 
 export const tabs = Object.values(Tab);
 export const Choice={
-    heads: "Heads",
-    tails: "Tails"
+    heads: "HEADS",
+    tails: "TAILS"
 }
 export const choices = Object.values(Choice);
 

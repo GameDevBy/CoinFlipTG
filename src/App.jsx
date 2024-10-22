@@ -14,7 +14,7 @@ import useSSE from "./hooks/useSSE";
 
 function App() {
     const {webAppUser, tg, isReady} = useTelegram()
-    const {setUserId, scoreData, gameData, closeEventSource} = useSSE();
+    const {setUserId, scoreDataSSE, gameDataSSE, closeEventSource} = useSSE();
     const [initUser, setInitUser] = useState();
     const [score, setScore] = useState();
     const [activeTab, setActiveTab] = useState(Tab.home);
@@ -55,10 +55,10 @@ function App() {
     }, [webAppUser, isReady]);
 
     useEffect(() => {
-        if (scoreData) {
-            handleSSEUpdate(scoreData)
+        if (scoreDataSSE) {
+            handleSSEUpdate(scoreDataSSE)
         }
-    }, [scoreData]);
+    }, [scoreDataSSE]);
 
     useEffect(() => {
         const handleWebAppClose = () => closeEventSource(initUser?.id);
@@ -143,7 +143,7 @@ function App() {
                     setGames={setGames}
                     setActiveGame={setActiveGame}
                     setLastCreatedGame={setLastCreatedGame}
-                    gameData={gameData}
+                    gameDataSSE={gameDataSSE}
                 />
             )}
             {activeTab === Tab.shop && (

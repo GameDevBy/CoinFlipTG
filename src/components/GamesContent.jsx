@@ -12,7 +12,7 @@ const GamesContent = ({
                           setGames,
                           setActiveGame,
                           setLastCreatedGame,
-                          gameData
+                          gameDataSSE
                       }) => {
     const {tg} = useTelegram();
 
@@ -27,10 +27,10 @@ const GamesContent = ({
     }, [initUser]);
 
     useEffect(() => {
-        if (gameData) {
-            handleSSEUpdate(gameData)
+        if (gameDataSSE) {
+            handleSSEUpdate(gameDataSSE)
         }
-    }, [gameData]);
+    }, [gameDataSSE]);
 
     const getActiveGames = async () => {
         const activeGames = await fetchGames();
